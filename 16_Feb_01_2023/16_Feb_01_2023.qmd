@@ -1,0 +1,76 @@
+
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(ggiraph)
+
+
+dat <- gapminder::gapminder |> 
+  janitor::clean_names() |> 
+  mutate(
+    # ID that is shared for boxplots 
+    # (continent one uses factors, i.e. numbers, as ID instead of actual continent names)
+    id = as.numeric(continent),
+    continent = forcats::fct_reorder(continent, life_exp)
+  )
+
+color_palette <- thematic::okabe_ito(5)
+names(color_palette) <- unique(dat$continent)
+base_size <- 20
+
+mean_life_exps <- dat |> 
+  group_by(continent, year, id) |> 
+  summarise(mean_life_exp = mean(life_exp)) 
+
+line_chart <- mean_life_exps |> 
+  ggplot(aes(x = year, y = mean_life_exp, col = continent, data_id = id)) +
+  geom_line_interactive(linewidth = 2.5) +
+  geom_point_interactive(size = 4) +
+  theme_minimal(base_size = base_size) +
+  labs(
+    x = element_blank(),
+    y = 'Life expectancy (in years)',
+    title = 'Life expectancy over time'
+  ) +
+  theme(
+    text = element_text(
+      color = 'grey20'
+    ),
+    legend.position = 'none',
+    panel.grid.minor = element_blank(),
+    plot.title.position = 'plot'
+  ) +
+  scale_color_manual(values = color_palette)
+
+girafe(
+  ggobj = line_chart,
+  options = list(
+    opts_hover(css = ''),
+    opts_hover_inv(css = "opacity:0.1;"),
+    opts_sizing(rescale = FALSE)
+  ),
+  height_svg = 6,
+  width_svg = 9
+)
+
+```
+
+
+
+
+```{r}
+girafe(
+  ggobj = line_chart,
+  options = list(
+    opts_sizing(rescale = FALSE)
+  ),
+  height_svg = 6,
+  width_svg = 9
+)
+```
+
+
