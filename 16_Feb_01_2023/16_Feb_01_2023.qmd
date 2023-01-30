@@ -20,11 +20,12 @@ dat <- gapminder::gapminder |>
 
 color_palette <- thematic::okabe_ito(5)
 names(color_palette) <- unique(dat$continent)
-base_size <- 20
+base_size <- 18
 
 mean_life_exps <- dat |> 
   group_by(continent, year, id) |> 
-  summarise(mean_life_exp = mean(life_exp)) 
+  summarise(mean_life_exp = mean(life_exp)) |> 
+  ungroup()
 
 line_chart <- mean_life_exps |> 
   ggplot(aes(x = year, y = mean_life_exp, col = continent, data_id = id)) +
@@ -60,17 +61,72 @@ girafe(
 ```
 
 
+## Box plot
+
+```{r}
+selected_year <- 2007
+box_plot <- dat |> 
+  filter(year == selected_year) |> 
+  ggplot(aes(x = life_exp, y = continent, fill = continent, data_id = id)) +
+  geom_boxplot_interactive(
+    position = position_nudge(y = 0.25), 
+    width = 0.5
+  ) +
+  geom_point_interactive(
+    aes(col = continent),
+    position = position_nudge(y = -0.25),
+    size = 8,
+    shape = '|',
+    alpha = 0.75
+  ) +
+  scale_fill_manual(values = color_palette) +
+  scale_color_manual(values = color_palette) +
+  labs(
+    x = 'Life expectancy (in years)',
+    y = element_blank(),
+    title = glue::glue('Distribution of Life Expectancy in {selected_year}')
+  ) +
+  theme_minimal(base_size = base_size) +
+  theme(
+    text = element_text(
+      color = 'grey20'
+    ),
+    legend.position = 'none',
+    panel.grid.minor = element_blank(),
+    plot.title.position = 'plot'
+  ) 
+```
 
 
 ```{r}
 girafe(
-  ggobj = line_chart,
+  ggobj = box_plot,
   options = list(
+    opts_hover(css = ''),
+    opts_hover_inv(css = "opacity:0.1;"),
     opts_sizing(rescale = FALSE)
   ),
   height_svg = 6,
   width_svg = 9
 )
+
 ```
+
+
+
+```{r}
+library(patchwork)
+girafe(
+  ggobj = box_plot + plot_spacer() + line_chart + plot_layout(widths = c(0.45, 0.1, 0.45)),
+  options = list(
+    opts_hover(css = ''),
+    opts_hover_inv(css = "opacity:0.1;"),
+    opts_sizing(rescale = FALSE)
+  ),
+  height_svg = 8,
+  width_svg = 12
+)
+```
+
 
 
