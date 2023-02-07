@@ -1,0 +1,340 @@
+
+
+
+```{r}
+library(ggiraph)
+library(tidyverse)
+library(patchwork)
+library(shiny)
+library(gt)
+```
+
+
+## Prep work for the Shiny apps
+
+```{r}
+dat <- gapminder::gapminder |> 
+  janitor::clean_names() |> 
+  mutate(
+    # ID that is shared for boxplots (this one uses factors, i.e. numbers, as ID instead of continents)
+    id = levels(continent)[as.numeric(continent)],
+    continent = forcats::fct_reorder(continent, life_exp)
+  )
+
+color_palette <- thematic::okabe_ito(5)
+names(color_palette) <- unique(dat$continent)
+
+base_size <- 40
+```
+
+
+## Basic Shiny app
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(
+    # Colors (background, foreground, primary)
+    bg = 'white', 
+    fg = '#06436e', 
+    primary = colorspace::lighten('#06436e', 0.3),
+    
+    # Fonts (Use multiple in case a font cannot be displayed)
+    base_font = c('Source Sans Pro',  'Lato', 'Merriweather', 'Roboto Regular', 'Cabin Regular'),
+    heading_font = c('Oleo Script', 'Prata', 'Roboto', 'Playfair Display', 'Montserrat'),
+    font_scale = 1.25
+  ),
+  h1('Helloooo!'),
+  sidebarLayout(
+    sidebarPanel = sidebarPanel(
+      selectInput(
+        'selected_year',
+        'What year do you want to look at?',
+        choices = unique(dat$year)
+      )
+    ),
+    mainPanel = mainPanel(
+      girafeOutput('girafe_output', height = 600)
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  dat_year <- reactive({dat |> filter(year == input$selected_year)})
+  
+  output$girafe_output <- renderGirafe({
+
+    box_plot <- dat_year() |> 
+      ggplot(aes(x = life_exp, y = continent, fill = continent, data_id = id)) +
+      geom_boxplot_interactive(
+        position = position_nudge(y = 0.25), 
+        width = 0.5
+      ) +
+      geom_point_interactive(
+        aes(col = continent),
+        position = position_nudge(y = -0.2),
+        size = 11,
+        shape = '|',
+        alpha = 0.75
+      ) +
+      scale_fill_manual(values = color_palette) +
+      scale_color_manual(values = color_palette) +
+      labs(
+        x = 'Life expectancy (in years)',
+        y = element_blank(),
+        title = glue::glue('Distribution of Life Expectancy in {input$selected_year}')
+      ) +
+      theme_minimal(base_size = base_size) +
+      theme(
+        text = element_text(color = 'grey20'),
+        legend.position = 'none',
+        panel.grid.minor = element_blank(),
+        plot.title.position = 'plot'
+      ) 
+    
+    girafe(
+      ggobj = box_plot,
+      options = list(
+        opts_hover(css = ''),
+        opts_sizing(rescale = TRUE),
+        opts_hover_inv(css = "opacity:0.1;")
+      ),
+      height_svg = 12,
+      width_svg = 25
+    )
+    
+  })
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+## Selections App with Table
+
+
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(
+    # Colors (background, foreground, primary)
+    bg = 'white', 
+    fg = '#06436e', 
+    primary = colorspace::lighten('#06436e', 0.3),
+    
+    # Fonts (Use multiple in case a font cannot be displayed)
+    base_font = c('Source Sans Pro',  'Lato', 'Merriweather', 'Roboto Regular', 'Cabin Regular'),
+    heading_font = c('Oleo Script', 'Prata', 'Roboto', 'Playfair Display', 'Montserrat'),
+    font_scale = 1.25
+  ),
+  h1('Helloooo!'),
+  sidebarLayout(
+    sidebarPanel = sidebarPanel(
+      selectInput(
+        'selected_year',
+        'What year do you want to look at?',
+        choices = unique(dat$year)
+      ),
+      gt_output('gt_output')
+    ),
+    mainPanel = mainPanel(
+      girafeOutput('girafe_output', height = 600)
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  dat_year <- reactive({dat |> filter(year == input$selected_year)})
+  
+  output$gt_output <- render_gt({
+    req(input$girafe_output_selected)
+    
+    selected_rows <- parse_number(input$girafe_output_selected)
+      
+    dat_year() |> 
+      slice(selected_rows) |> 
+      select(continent, country, life_exp) |> 
+      arrange(desc(life_exp)) |> 
+      group_by(continent) |> 
+      gt() |> 
+      opt_stylize(style = 5) |> 
+      cols_align(columns = -life_exp, align = 'left') |> 
+      cols_label(continent = 'Continent', country = 'Country', life_exp = 'Life Expectancy') |> 
+      tab_header(
+        title = 'Selected Countries'
+      ) |> 
+      tab_style(
+        locations = cells_row_groups(),
+        style = list(
+          cell_fill(color = 'grey20'),
+          cell_text(color = 'white')
+        )
+      )
+  })
+  
+  
+  
+  output$girafe_output <- renderGirafe({
+  
+      box_plot <- dat_year() |> 
+        ggplot(aes(x = life_exp, y = continent, fill = continent, data_id = id)) +
+        geom_boxplot_interactive(
+          position = position_nudge(y = 0.25), 
+          width = 0.5
+        ) +
+        geom_point_interactive(
+          aes(col = continent, data_id = seq_along(country)),
+          position = position_nudge(y = -0.2),
+          size = 11,
+          shape = '|',
+          alpha = 0.75
+        ) +
+        scale_fill_manual(values = color_palette) +
+        scale_color_manual(values = color_palette) +
+        labs(
+          x = 'Life expectancy (in years)',
+          y = element_blank(),
+          title = glue::glue('Distribution of Life Expectancy in {input$selected_year}')
+        ) +
+        theme_minimal(base_size = base_size) +
+        theme(
+          text = element_text(color = 'grey20'),
+          legend.position = 'none',
+          panel.grid.minor = element_blank(),
+          plot.title.position = 'plot'
+        ) 
+      
+      girafe(
+        ggobj = box_plot,
+        options = list(
+          opts_hover(css = ''),
+          opts_sizing(rescale = TRUE),
+          opts_hover_inv(css = "opacity:0.1;")
+        ),
+        height_svg = 12,
+        width_svg = 25
+      )
+      
+    })
+  
+}
+shinyApp(ui, server)
+```
+
+
+## Onclick app
+
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(
+    # Colors (background, foreground, primary)
+    bg = 'white', 
+    fg = '#06436e', 
+    primary = colorspace::lighten('#06436e', 0.3),
+    
+    # Fonts (Use multiple in case a font cannot be displayed)
+    base_font = c('Source Sans Pro',  'Lato', 'Merriweather', 'Roboto Regular', 'Cabin Regular'),
+    heading_font = c('Oleo Script', 'Prata', 'Roboto', 'Playfair Display', 'Montserrat'),
+    font_scale = 1.25
+  ),
+  h1('Helloooo!'),
+  sidebarLayout(
+    sidebarPanel = sidebarPanel(
+      selectInput(
+        'selected_year',
+        'What year do you want to look at?',
+        choices = unique(dat$year)
+      ),
+      gt_output('gt_output')
+    ),
+    mainPanel = mainPanel(
+      girafeOutput('girafe_output', height = 600)
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  dat_year <- reactive({dat |> filter(year == input$selected_year)})
+  
+  output$gt_output <- render_gt({
+    req(input$girafe_output_selected)
+    
+    selected_rows <- parse_number(input$girafe_output_selected)
+      
+    dat_year() |> 
+      slice(selected_rows) |> 
+      select(continent, country, life_exp) |> 
+      arrange(desc(life_exp)) |> 
+      group_by(continent) |> 
+      gt() |> 
+      opt_stylize(style = 5) |> 
+      cols_align(columns = -life_exp, align = 'left') |> 
+      cols_label(continent = 'Continent', country = 'Country', life_exp = 'Life Expectancy') |> 
+      tab_header(
+        title = 'Selected Countries'
+      ) |> 
+      tab_style(
+        locations = cells_row_groups(),
+        style = list(
+          cell_fill(color = 'grey20'),
+          cell_text(color = 'white')
+        )
+      )
+  })
+  
+  
+  
+  output$girafe_output <- renderGirafe({
+  
+      box_plot <- dat_year() |> 
+        ggplot(aes(x = life_exp, y = continent, fill = continent, data_id = id)) +
+        geom_boxplot_interactive(
+          aes(onclick = glue::glue('window.open("https://en.wikipedia.org/wiki/{continent}")')),
+          position = position_nudge(y = 0.25), 
+          width = 0.5
+        ) +
+        geom_point_interactive(
+          aes(col = continent, data_id = seq_along(country)),
+          position = position_nudge(y = -0.2),
+          size = 11,
+          shape = '|',
+          alpha = 0.75
+        ) +
+        scale_fill_manual(values = color_palette) +
+        scale_color_manual(values = color_palette) +
+        labs(
+          x = 'Life expectancy (in years)',
+          y = element_blank(),
+          title = glue::glue('Distribution of Life Expectancy in {input$selected_year}')
+        ) +
+        theme_minimal(base_size = base_size) +
+        theme(
+          text = element_text(color = 'grey20'),
+          legend.position = 'none',
+          panel.grid.minor = element_blank(),
+          plot.title.position = 'plot'
+        ) 
+      
+      girafe(
+        ggobj = box_plot,
+        options = list(
+          opts_hover(css = ''),
+          opts_sizing(rescale = TRUE),
+          opts_hover_inv(css = "opacity:0.1;")
+        ),
+        height_svg = 12,
+        width_svg = 25
+      )
+      
+    })
+  
+}
+shinyApp(ui, server)
+```
+
+
+
