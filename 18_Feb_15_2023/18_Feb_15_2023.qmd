@@ -1,17 +1,4 @@
 
-
-
-Text manipulation is an essential data cleaning skill,
-You need it all the time for tasks like
-
-- cleaning IDs before joining data sets
-- removing or replacing superfluous words/letters
-- combining or transforming sentences
-
-Here are XXXXX examples and how to solve them with #rstats.
-
-
-
 ## Renaming long names
 
 Load `tidyverse` and data from TidyTuesday.
