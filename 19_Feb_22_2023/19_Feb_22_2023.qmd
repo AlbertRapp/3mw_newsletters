@@ -1,0 +1,135 @@
+## Bad plot first
+
+```{r}
+library(tidyverse)
+tooth_data <- ToothGrowth |> 
+  as_tibble() |> 
+  mutate(dose = factor(dose)) 
+
+tooth_data |> 
+  ggplot(
+    aes(y = len, x = supp, fill = dose)
+  ) +
+  geom_point(
+    size = 6,
+    alpha = 0.75,
+    shape = 21,
+    col = 'black',
+    position = position_dodge(
+      width = 0.5
+    )
+  ) 
+```
+
+## Increase size and add labels
+
+```{r}
+tooth_data |> 
+  ggplot(
+    aes(y = len, x = supp, fill = dose)
+  ) +
+  geom_point(
+    size = 6,
+    alpha = 0.75,
+    shape = 21,
+    col = 'black',
+    position = position_dodge(
+      width = 0.5
+    )
+  ) +
+  theme_gray(base_size = 20) +
+  labs(
+    x = 'Supplement', 
+    y = 'Length', 
+    col = 'Dose', 
+    title = 'Length of tooth growth cells after supplements'
+  )
+```
+
+## Use minimal theme
+
+```{r}
+tooth_data |> 
+  ggplot(
+    aes(y = len, x = supp, fill = dose)
+  ) +
+  geom_point(
+    size = 6,
+    alpha = 0.75,
+    shape = 21,
+    col = 'black',
+    position = position_dodge(
+      width = 0.5
+    )
+  ) +
+  theme_minimal(base_size = 20) +
+  labs(x = 'Supplement', y = 'Length', col = 'Dose', title = 'Length of tooth growth cells after supplements')
+```
+
+## Format labels
+
+```{r}
+tooth_data_relabeled <- tooth_data |> 
+  mutate(
+    supp = if_else(supp == 'VC', 'Vitamin C supplement', 'Orange Juice')
+  ) 
+
+tooth_data_relabeled |> 
+  ggplot(
+    aes(y = len, x = supp, col = dose)
+  ) +
+  geom_point(
+    size = 3,
+    position = position_dodge(
+      width = 0.5
+    )
+  ) +
+  theme_minimal(base_size = 20) +
+  labs(x = 'Supplement', y = 'Length', col = 'Dose', title = 'Length of tooth growth cells after supplements')
+```
+
+## Put categorical labels on y-axis
+
+```{r}
+sorted_mpg_data <- mpg |> 
+  count(manufacturer) |> 
+  mutate(manufacturer = fct_reorder(manufacturer, n)) 
+
+sorted_mpg_data |> 
+  ggplot(aes(x = manufacturer, y = n)) +
+  geom_col(fill = 'dodgerblue4') +
+  geom_text(
+    aes(label = n), 
+    col = 'white', 
+    position = position_nudge(y = -1), 
+    size = 6,
+    fontface = 'bold'
+  ) +
+  theme_minimal(base_size = 20) +
+  labs(
+    x = element_blank(), 
+    y = 'Number of car models', 
+    title = 'Number of car models by manufacturer'
+  )
+```
+
+```{r}
+sorted_mpg_data |> 
+  # It was x = manufacturer, y = n before
+  ggplot(aes(y = manufacturer, x = n)) +
+  geom_col(fill = 'dodgerblue4') +
+  geom_text(
+    aes(label = n), 
+    col = 'white', 
+    position = position_nudge(x = -1), 
+    size = 6,
+    fontface = 'bold'
+  ) +
+  theme_minimal(base_size = 20) +
+  labs(
+    y = element_blank(), 
+    x = 'Number of car models', 
+    title = 'Number of car models by manufacturer'
+  )
+```
+  
