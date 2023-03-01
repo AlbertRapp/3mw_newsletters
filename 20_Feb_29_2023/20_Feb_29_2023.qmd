@@ -1,0 +1,228 @@
+## No styling app
+
+```{r}
+library(shiny)
+library(tidyverse)
+
+penguins <- palmerpenguins::penguins |> filter(!is.na(sex))
+
+# Define UI
+ui <- fluidPage(
+
+  # Navbar
+  navbarPage(
+    title = "Data Plots",
+
+    # Month panels
+    tabPanel(
+      "Penguins",
+      sidebarLayout(
+        sidebarPanel(
+          sliderInput(
+            inputId = "body_mass", 
+            label = "Minimum Body Mass", 
+            min = min(penguins$body_mass_g), 
+            max = max(penguins$body_mass_g), 
+            value = mean(penguins$body_mass_g)
+          ),
+        sliderInput(
+          inputId = "flipper_length", 
+          label = "Minimum Flipper Length", 
+          min = min(penguins$flipper_length_mm), 
+          max = max(penguins$flipper_length_mm), 
+          value = mean(penguins$flipper_length_mm))
+        ),
+        mainPanel(
+          plotOutput(outputId = "plot")
+        )
+      )
+    ),
+    tabPanel("Other data sets"),
+  
+  )
+)
+
+# Define server
+server <- function(input, output) {
+  # Render plot
+  output$plot <- renderPlot({
+    
+    color_points <- (penguins$body_mass_g >= input$body_mass) &
+      (penguins$flipper_length_mm >= input$flipper_length)
+    ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) + 
+      geom_point(
+        size = 6,
+        shape = 21,
+        col = 'black',
+        fill = if_else(color_points, 'dodgerblue4', 'grey80'),
+        alpha = 0.5
+      ) +
+      theme_minimal(base_size = 20) +
+      labs(
+        title = "Body Mass vs Flipper Length",
+        x = "Body Mass (g)",
+        y = "Flipper Length (mm)"
+      )
+  })
+}
+
+# Run the app
+shinyApp(ui = ui, server = server)
+```
+
+## Add predefined theme
+
+I will only change the UI
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'flatly'),
+  
+  # Navbar
+  navbarPage(
+    title = "Data Plots",
+
+    # Month panels
+    tabPanel(
+      "Penguins",
+      sidebarLayout(
+        sidebarPanel(
+          sliderInput(
+            inputId = "body_mass", 
+            label = "Minimum Body Mass", 
+            min = min(penguins$body_mass_g), 
+            max = max(penguins$body_mass_g), 
+            value = mean(penguins$body_mass_g)
+          ),
+        sliderInput(
+          inputId = "flipper_length", 
+          label = "Minimum Flipper Length", 
+          min = min(penguins$flipper_length_mm), 
+          max = max(penguins$flipper_length_mm), 
+          value = mean(penguins$flipper_length_mm))
+        ),
+        mainPanel(
+          plotOutput(outputId = "plot")
+        )
+      )
+    ),
+    tabPanel("Other data sets"),
+  
+  )
+)
+shinyApp(ui = ui, server = server)
+```
+
+## Custom theme
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(
+    # Colors (background, foreground, primary)
+    bg = 'white', 
+    fg = '#8b1a1a', 
+    primary = colorspace::lighten('#8b1a1a', 0.3),
+  
+    # Fonts (Use multiple in case a font cannot be displayed)
+    base_font = c('Source Sans Pro',  'Lato', 'Merriweather', 'Roboto Regular', 'Cabin Regular'),
+    heading_font = c('Oleo Script', 'Prata', 'Roboto', 'Playfair Display', 'Montserrat'),
+    font_scale = 1.25
+  ),
+  
+  # Navbar
+  navbarPage(
+    title = "Data Plots",
+
+    # Month panels
+    tabPanel(
+      "Penguins",
+      sidebarLayout(
+        sidebarPanel(
+          sliderInput(
+            inputId = "body_mass", 
+            label = "Minimum Body Mass", 
+            min = min(penguins$body_mass_g), 
+            max = max(penguins$body_mass_g), 
+            value = mean(penguins$body_mass_g)
+          ),
+        sliderInput(
+          inputId = "flipper_length", 
+          label = "Minimum Flipper Length", 
+          min = min(penguins$flipper_length_mm), 
+          max = max(penguins$flipper_length_mm), 
+          value = mean(penguins$flipper_length_mm))
+        ),
+        mainPanel(
+          plotOutput(outputId = "plot")
+        )
+      )
+    ),
+    tabPanel("Other data sets"),
+  
+  )
+)
+shinyApp(ui = ui, server = server)
+```
+
+
+## CSS Code
+
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(
+    # Colors (background, foreground, primary)
+    bg = 'white', 
+    fg = '#8b1a1a', 
+    primary = colorspace::lighten('#8b1a1a', 0.3),
+  
+    # Fonts (Use multiple in case a font cannot be displayed)
+    base_font = c('Source Sans Pro',  'Lato', 'Merriweather', 'Roboto Regular', 'Cabin Regular'),
+    heading_font = c('Oleo Script', 'Prata', 'Roboto', 'Playfair Display', 'Montserrat'),
+    font_scale = 1.25
+  ),
+  tags$style(
+    '
+    .irs--shiny .irs-bar, 
+    .irs--shiny .irs-from, .irs--shiny .irs-to, .irs--shiny .irs-single,
+    .irs--shiny .irs-handle  {
+      background: green;
+    }
+    '
+  ),
+  
+  # Navbar
+  navbarPage(
+    title = "Data Plots",
+
+    # Month panels
+    tabPanel(
+      "Penguins",
+      sidebarLayout(
+        sidebarPanel(
+          sliderInput(
+            inputId = "body_mass", 
+            label = "Minimum Body Mass", 
+            min = min(penguins$body_mass_g), 
+            max = max(penguins$body_mass_g), 
+            value = mean(penguins$body_mass_g)
+          ),
+        sliderInput(
+          inputId = "flipper_length", 
+          label = "Minimum Flipper Length", 
+          min = min(penguins$flipper_length_mm), 
+          max = max(penguins$flipper_length_mm), 
+          value = mean(penguins$flipper_length_mm))
+        ),
+        mainPanel(
+          plotOutput(outputId = "plot")
+        )
+      )
+    ),
+    tabPanel("Other data sets"),
+  
+  )
+)
+shinyApp(ui = ui, server = server)
+```
+
