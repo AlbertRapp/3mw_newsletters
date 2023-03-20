@@ -140,4 +140,3 @@ sorted_mpg_data |>
     title = 'Number of car models by manufacturer'
   )
 ```
-  

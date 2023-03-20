@@ -1,0 +1,45 @@
+
+
+```{r}
+
+library(shiny)
+
+test_UI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    actionButton(ns('btn'), 'Click me')
+  )
+}
+
+test_Server <- function(id) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      btn_clicked <- reactiveVal(0)
+      
+      observeEvent(input$btn, {
+        btn_clicked(btn_clicked() + 1)
+      })
+      
+      return(btn_clicked) # Module server returns nmbr of clicks as a reactive
+    }
+  )
+  
+}
+
+
+ui <- fluidPage(
+  test_UI('test'),
+  textOutput('text')
+)
+
+server <- function(input, output, session) {
+  btn <- test_Server('test') # assign return value to variable that can be used later
+  output$text <- renderText({
+    paste0('The button was clicked ', btn(), ' times')
+  })
+}
+
+shinyApp(ui, server)
+```
+
