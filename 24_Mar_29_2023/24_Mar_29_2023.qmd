@@ -1,0 +1,82 @@
+
+
+
+```{r}
+camcorder::gg_record(
+  dir = 'img',
+  device = 'png',
+  width = 16,
+  height = 9,
+  unit = 'cm'
+)
+
+library(tidyverse)
+
+colors <- thematic::okabe_ito(2)
+names(colors) <- c('male', 'female')
+
+palmerpenguins::penguins |> 
+  filter(!is.na(sex)) |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm, fill = sex)) +
+  geom_point(size = 3, alpha = 0.75, col = 'black', shape = 21) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = 'none',
+    panel.grid.minor = element_blank(),
+    plot.title.position = 'plot',
+    plot.background = element_rect(fill = 'white', color = NA),
+    plot.title = ggtext::element_markdown()
+  ) +
+  labs(
+    x = 'Bill length (in mm)',
+    y = 'Flipper length (in mm)',
+    title = glue::glue('Measurements of <span style="color:{colors["male"]}">**male**</span> and <span style=color:{colors["female"]}>**female**</span> penguins')
+  ) +
+  scale_fill_manual(values = colors)
+```
+
+
+
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  h1('A button, wow.'),
+  actionButton(
+    'btn',
+    'Click me',
+    width = '200px'
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  h1('A huge round-ish button, cool.'),
+  actionButton(
+    'btn',
+    'Click me',
+    width = '200px',
+    style = 'height:75px; border-radius:40px;font-weight:600;'
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```

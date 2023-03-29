@@ -76,7 +76,7 @@ I will only change the UI
 
 ```{r}
 ui <- fluidPage(
-  theme = bslib::bs_theme(bootswatch = 'flatly'),
+  theme = bslib::bs_theme(bootswatch = 'quartz'),
   
   # Navbar
   navbarPage(
@@ -164,9 +164,7 @@ ui <- fluidPage(
 shinyApp(ui = ui, server = server)
 ```
 
-
 ## CSS Code
-
 
 ```{r}
 ui <- fluidPage(
@@ -225,4 +223,3 @@ ui <- fluidPage(
 )
 shinyApp(ui = ui, server = server)
 ```
-
