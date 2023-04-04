@@ -1,0 +1,92 @@
+
+
+<span style="
+  font-weight:bold;
+  color:blue;">
+This text is bold and blue.
+</span>
+
+
+<span style="
+  background-color: darkblue;
+  color:white;">
+This text is white with blue background
+</span>
+
+
+
+<span style="
+  background-color: darkblue;
+  color:white;
+  padding: 5px;
+  border-radius: 10px;">
+This background now has rounded corners and the text a little bit of room to breathe. 
+</span>
+
+
+
+
+<span style="
+  display: inline-block; 
+  background-color: pink; 
+  width: 1cm;
+  height: 1cm;">
+</span>
+<span style="
+  display: inline-block; 
+  background-color: pink; 
+  width: 1cm;
+  height: 1cm;">
+</span>
+
+
+<span style="
+  display: inline-block; 
+  background-color: pink; 
+  width: 1cm;
+  height: 1cm;
+  border-radius: 100%;
+  border: black 1px solid;
+  margin-left: 5px;">
+</span>
+<span style="
+  display: inline-block; 
+  background-color: pink; 
+  width: 1cm;
+  height: 1cm;
+  border-radius: 100%;
+  border: black 1px solid;
+  margin-left: 5px;">
+</span>
+
+
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(gt)
+
+circle <- '<span style="
+  display: inline-block; 
+  background-color: pink; 
+  width: 1cm;
+  height: 1cm;
+  border-radius: 100%;
+  border: black 1px solid;
+  margin-left: 5px;">
+</span>'
+
+tibble(
+  grade = c('A', 'B', 'C', 'D', 'F'),
+  students = c(2, 5, 3, 1, 1),
+  plot = map_chr(students, \(x) rep(circle, x) |> paste(collapse = ''))
+) |> 
+  gt() |> 
+  fmt_markdown(columns = plot) |> 
+  cols_label(grade = 'Grade', students = 'Students', plot = '') |> 
+  tab_header(title = 'Fictitious exam results') |> 
+  tab_options(heading.align = 'left')
+```
+
+
