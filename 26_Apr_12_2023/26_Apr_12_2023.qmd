@@ -1,0 +1,111 @@
+
+
+
+```{r}
+library(tidyverse)
+library(gt)
+my_split_table <- towny |> 
+  slice(1:10) |> 
+  select(name, land_area_km2) |>
+  gt() |> 
+  gt_split(row_every_n = 5)
+
+class(my_split_table)
+# [1] "gt_group"
+```
+
+
+
+```{r}
+#| eval: false
+gt:::print.gt_group
+# function (x, ..., view = interactive()) 
+# {
+#     html_tbls <- htmltools::tagList()
+#     seq_tbls <- seq_len(nrow(x$gt_tbls))
+#     for (i in seq_tbls) {
+#         html_tbl_i <- as.tags.gt_tbl(grp_pull(x, which = i), 
+#             ...)
+#         html_tbls <- htmltools::tagList(html_tbls, html_tbl_i, 
+#             if (i != max(seq_tbls)) 
+#                 htmltools::HTML("<br />"))
+#     }
+#     print(html_tbls, browse = view, ...)
+# }
+# <bytecode: 0x556c3ff94d18>
+# <environment: namespace:gt>
+```
+
+
+```{r}
+library(knitr)
+registerS3method(
+  "knit_print", 'gt_group', gt:::print.gt_group,
+  envir = asNamespace("gt")
+  # important to overwrite {gt}s knit_print
+)
+```
+
+
+```{r}
+#| output: asis
+my_split_table
+```
+
+
+
+```{r}
+#| output: asis
+my_enhanced_print.gt_group <- 
+  function (x, css_outer = NULL, css_inner = NULL, ..., view = interactive()) {
+    html_tbls <- htmltools::tagList()
+    seq_tbls <- seq_len(nrow(x$gt_tbls))
+    for (i in seq_tbls) {
+        html_tbl_i <- 
+          ## Wrap sub-tables into div-container
+          htmltools::div(
+            style = css_inner,
+            ## gt::: added here so that our function knows to use the hidden {gt} function
+            gt:::as.tags.gt_tbl(grp_pull(x, which = i), ...)
+          )
+        html_tbls <- htmltools::tagList(
+          html_tbls, 
+          html_tbl_i, 
+          if (i != max(seq_tbls)) htmltools::HTML("<br />"))
+    }
+    # Wrap output into another div-container
+    htmltools::div(
+      style = css_outer,
+      html_tbls
+    )
+}
+my_split_table |> 
+  my_enhanced_print.gt_group()
+```
+
+
+```{r}
+#| output: asis
+#| echo: fenced
+my_split_table |> 
+  my_enhanced_print.gt_group(
+    css_outer = 'display: flex;'
+  )
+```
+
+
+
+```{r}
+#| output: asis
+#| echo: fenced
+my_split_table |> 
+  my_enhanced_print.gt_group(
+    css_outer = 'display: flex;',
+    css_inner = 'margin-left: auto; margin-right: auto;'
+  )
+```
+
+
+
+
+
