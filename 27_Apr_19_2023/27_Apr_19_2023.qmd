@@ -1,0 +1,113 @@
+```{r}
+library(tidyverse)
+library(gt)
+my_enhanced_print.gt_group <- 
+  function (x, css_outer = NULL, css_inner = NULL, ..., view = interactive()) {
+    html_tbls <- htmltools::tagList()
+    seq_tbls <- seq_len(nrow(x$gt_tbls))
+    for (i in seq_tbls) {
+        html_tbl_i <- 
+          ## Wrap sub-tables into div-container
+          htmltools::div(
+            style = css_inner,
+            ## gt::: added here so that our function knows to use the hidden {gt} function
+            gt:::as.tags.gt_tbl(grp_pull(x, which = i), ...)
+          )
+        html_tbls <- htmltools::tagList(
+          html_tbls, 
+          html_tbl_i, 
+          if (i != max(seq_tbls)) htmltools::HTML("<br />"))
+    }
+    # Wrap output into another div-container
+    htmltools::div(
+      style = css_outer,
+      html_tbls
+    )
+}
+```
+
+```{r}
+my_split_table <- towny |> 
+  slice(1:10) |> 
+  select(name, land_area_km2) |>
+  gt() |> 
+  opt_stylize(style = 6, color = "gray") |> 
+  gt_split(row_every_n = 4) # Split after every fourth row
+```
+
+```{r}
+#| output: asis
+#| echo: fenced
+my_split_table |> 
+  my_enhanced_print.gt_group(
+    css_outer = 'display: flex',
+    css_inner = 'margin-left: auto; margin-right: auto; min-width: 300px;'
+    # Added min-width so that tables do not shrink
+  )
+```
+
+# Use flex-wrap
+
+```{r}
+#| output: asis
+#| echo: fenced
+my_split_table |> 
+  my_enhanced_print.gt_group(
+    css_outer = 'display: flex;flex-wrap: wrap;',
+    css_inner = 'margin-left: auto; margin-right: auto; min-width: 300px;'
+    # Added min-width to that tables do not shrink
+  )
+```
+
+# Use display grid
+
+```{r}
+#| output: asis
+#| echo: fenced
+my_split_table |> 
+  my_enhanced_print.gt_group(
+    css_outer = 'display: grid; grid-template-columns: repeat(2, 1fr);',
+  )
+```
+
+```{r}
+no_line_breaks_print.gt_group <- 
+  function (x, css_outer = NULL, css_inner = NULL, ..., view = interactive()) {
+    html_tbls <- htmltools::tagList()
+    seq_tbls <- seq_len(nrow(x$gt_tbls))
+    for (i in seq_tbls) {
+        html_tbl_i <- 
+          ## Wrap sub-tables into div-container
+          htmltools::div(
+            style = css_inner,
+            ## gt::: added here so that our function knows to use the hidden {gt} function
+            gt:::as.tags.gt_tbl(grp_pull(x, which = i), ...)
+          )
+        html_tbls <- htmltools::tagList(
+          html_tbls, 
+          html_tbl_i, 
+        )
+    }
+    # Wrap output into another div-container
+    htmltools::div(
+      style = css_outer,
+      html_tbls
+    )
+}
+```
+
+```{r}
+#| output: asis
+#| echo: fenced
+towny |> 
+  slice(1:10) |> 
+  select(name, land_area_km2) |>
+  gt() |> 
+  opt_stylize(style = 6, color = "gray") |> 
+  # Fix widths so that all tables use same width
+  cols_width(name ~ px(250), land_area_km2 ~ px(125)) |> 
+  gt_split(row_every_n = 4) |> 
+  no_line_breaks_print.gt_group(
+    css_outer = 'display: grid; grid-template-columns: repeat(2, 1fr);',
+  )
+```
