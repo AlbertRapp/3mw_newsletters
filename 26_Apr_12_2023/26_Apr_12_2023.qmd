@@ -48,6 +48,12 @@ registerS3method(
 
 
 ```{r}
+#| echo: fenced
+my_split_table
+```
+
+
+```{r}
 #| output: asis
 #| echo: fenced
 my_split_table
