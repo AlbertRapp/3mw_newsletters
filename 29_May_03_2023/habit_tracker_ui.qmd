@@ -1,0 +1,241 @@
+Throughout, the code chunks we will leave the server of the Shiny app empty.
+That's why it's only defined at the bottom of this Quarto file (along with the `shinyApp()` call that starts the app)
+
+First, we need a navbarPage with a tab Panel for each month
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      # January content will go here
+    ),
+    ### The big-bang operator (!!!) "unpacks" the list
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+Then create a div with fixed width that is horizontally scrollable.
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        paste0(
+          'Long content here', 
+          rep('e', 500) |> stringr::str_c(collapse = '')
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+Add dummy div containers
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        div(
+          style = 'display: flex',
+          div(
+            style = 'width: 125px',
+            'Habit Name'
+          ),
+          div(
+            'Checkboxes will go here'
+          )
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+Next, we add checkboxes.
+
+```{r}
+
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        div(
+          style = 'display: flex',
+          div(
+            style = 'width: 125px',
+            'Habit Name'
+          ),
+          div(
+            purrr::map(1:31, \(x) checkboxInput(
+              # unique id for each day
+              paste0('checkbox', x), '', 
+              width = '50px')
+            )
+          )
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+
+```
+
+Align checkboxes
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        div(
+          # Background color needs to be added here too
+          style = 'display: flex; background-color:#e5e5e5',
+          div(
+            style = 'width: 125px',
+            'Habit Name'
+          ),
+          div(
+            # This style is added
+            style = htmltools::css(
+              display = 'flex', 
+              background_color = '#e5e5e5',
+              padding_top = '5px',
+              padding_bottom = '5px'
+            ),
+            purrr::map(1:31, \(x) checkboxInput(
+              # unique id for each day
+              paste0('checkbox', x), '', 
+              width = '50px')
+            )
+          )
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+Change min-width
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        div(
+          style = 'display: flex; background-color:#e5e5e5',
+          div(
+            # Change width to min-width here
+            style = 'min-width: 125px',
+            'Habit Name'
+          ),
+          div(
+            style = htmltools::css(
+              display = 'flex', 
+              background_color = '#e5e5e5',
+              padding_top = '5px',
+              padding_bottom = '5px'
+            ),
+            purrr::map(1:31, \(x) checkboxInput(
+              # unique id for each day
+              paste0('checkbox', x), '', 
+              width = '50px')
+            )
+          )
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+
+Vertically align text
+
+```{r}
+ui <- fluidPage(
+  theme = bslib::bs_theme(bootswatch = 'minty'),
+  navbarPage(
+    'Habit Tracker',
+    tabPanel(
+      'January',
+      div(
+        style = 'width: 1000px; overflow-x: scroll; scrollbar-width: thin;',
+        div(
+          style = 'display: flex; background-color:#e5e5e5',
+          div(
+            # Add auto-margins and padding 
+            # Also changed to css() for cleaner code
+            style = htmltools::css(
+              min_width = '125px', 
+              padding_left = '20px', 
+              margin_top = 'auto',
+              margin_bottom =  'auto'
+            ),
+            'Habit Name'
+          ),
+          div(
+            style = htmltools::css(
+              display = 'flex', 
+              background_color = '#e5e5e5',
+              padding_top = '5px',
+              padding_bottom = '5px'
+            ),
+            purrr::map(1:31, \(x) checkboxInput(
+              # unique id for each day
+              paste0('checkbox', x), '', 
+              width = '50px')
+            )
+          )
+        )
+      )
+    ),
+    !!!purrr::map(month.name[-1], \(x) tabPanel(x))
+  )
+)
+```
+
+Nice!
+Our text is centered now.
+
+```{r}
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
