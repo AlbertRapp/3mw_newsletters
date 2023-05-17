@@ -1,10 +1,4 @@
 
-
-Quick recap from last week.
-We were in the midst of building this habit tracker app with Shiny.
-Our goal was to learn how to align content with HTML and CSS.
-Last time, we stopped after centering the name of the habit.
-
 ```{r}
 library(shiny)
 ui <- fluidPage(
@@ -49,25 +43,6 @@ ui <- fluidPage(
 )
 ```
 
-We created this app using flexboxes and setting `margin-top` and `margin-bottom` to `auto`.
-We can do the same thing to align the checkboxes properly.
-But this requires inserting CSS into the right places.
-
-The problem with that is that Shiny generates the HTML code for us, so we have to overwrite the CSS that Shiny uses internally.
-We do this by inserting our own style for the corresponding CSS classes into our app.
-As is often the case, the trick is to find the correct class name that we need to target.
-This can only be done by strolling through the HTML code of the app with your web browser.
-
-And it gets a little worse.
-The checkboxes are nested into other containers that Shiny creates.
-And these containers have classes of their own. of other classes
-This means that we have to find multiple class names to
-
-1.  enable flexbox display in the surrounding divs (in order to enable auto-margins)
-
-2.  change widths, height and margin of the checkbox (width and height optional but looks better)
-
-Once we've found these class names we can insert their new CSS code with `tags$style()`.
 
 ```{r}
 ui <- fluidPage(
@@ -124,17 +99,6 @@ ui <- fluidPage(
   )
 )
 ```
-
-Excellent!
-This looks great.
-Now onto the finishing touches.
-
-First, we take the code for one habit row and wrap it into a Shiny module.
-This way, we can scale our app to track more than just one habit without having to copy and paste code.
-Copy-and-pasting is really bad (LINK TO AVOID DUPLICATE CODE). 
-Especially in Shiny.
-Hence, the module.
-(If you're not familiar with modules yet, no worries, I got you covered..
 
 
 ```{r}
@@ -188,7 +152,6 @@ habit_rowServer <- function(id) {
 ```
 
 
-And once we have refactored the code logic into modules we can easily add more habits.
 
 ```{r}
 ui <- fluidPage(
@@ -225,8 +188,6 @@ ui <- fluidPage(
 )
 ```
 
-Finally, we just have to add the numbers 1 to 31 on top of the habit rows.
-For horizontally aligning the numbers, we can wrap the them into a div of the same width as the checkboxes and set `text-align:center;`
 
 ```{r}
 ui <- fluidPage(
@@ -276,8 +237,6 @@ ui <- fluidPage(
   )
 )
 ```
-
-
 
 ```{r}
 server <- function(input, output, session) {
