@@ -1,0 +1,88 @@
+
+
+```{r}
+library(tidyverse)
+mpg |> select(hwy, cty)
+```
+
+
+```{r}
+modeldata::ames 
+```
+
+
+```{r}
+modeldata::ames |> 
+  select(starts_with('Bsmt'))
+```
+
+
+```{r}
+modeldata::ames |> 
+  select(starts_with('Bsmt'), contains('Bath'))
+```
+
+
+```{r}
+modeldata::ames |> 
+  select(starts_with('Bsmt') & contains('Bath'))
+```
+
+
+
+
+```{r}
+modeldata::ames |> 
+  select(
+    starts_with('Bsmt') & contains('Bath'), 
+    MS_Zoning
+  )
+```
+
+
+```{r}
+# Empty because no variable 
+# has "1st|2nd" in its name
+modeldata::ames |> 
+  select(contains('(1st|2nd)'))
+
+# Finds those columns that have 
+# either "1st" or "2nd"in their name
+modeldata::ames |> 
+  select(matches('(1st|2nd)'))
+```
+
+
+```{r}
+modeldata::ames |> 
+  select(where(is.numeric))
+```
+
+
+```{r}
+modeldata::ames |> 
+  select(where(
+    \(x) is.numeric(x) && (mean(x) > 10000)
+  ))
+```
+
+
+```{r}
+modeldata::ames |> 
+  summarise(
+    across(
+      .cols = where(
+        \(x) is.numeric(x) && (mean(x) > 10000)
+        ),
+      .fns = c(
+        mean = mean, 
+        standard_dev = sd
+      )
+    )
+  )
+```
+
+
+
+
+
