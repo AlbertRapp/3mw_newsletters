@@ -1,0 +1,128 @@
+
+
+```{r}
+library(tidyverse)
+library(lubridate) # necessary with older versions of the tidyverse
+
+toy_data <- tibble(
+  dates = c(
+    'June 21, 2023',
+    'April 25, 2023',
+    'May 11, 2023',
+    '06-05-2023'
+  )
+)
+toy_data
+# A tibble: 4 × 1
+#   dates         
+#   <chr>         
+# 1 June 21, 2023 
+# 2 April 25, 2023
+# 3 May 11, 2023  
+# 4 06-05-2023 
+```
+
+
+
+```{r}
+toy_data |> 
+  mutate(
+    dates = parse_date(
+      dates,
+      format = '%B %d, %Y'
+    )
+  )
+# A tibble: 4 × 1
+#   dates     
+#   <date>    
+# 1 2023-06-21
+# 2 2023-04-25
+# 3 2023-05-11
+# 4 NA
+```
+
+
+
+```{r}
+# Warning message:
+# There was 1 warning in `mutate()`.
+# ℹ In argument: `dates = parse_date(dates, format = "%B %d, %Y")`.
+# Caused by warning:
+# ! 1 parsing failure.
+# row col            expected     actual
+#   4  -- date like %B %d, %Y 06-05-2023 
+```
+
+
+
+```{r}
+toy_data |> 
+  mutate(
+    # Watch out! This is from {lubridate}
+    # But {readr} has also parse_datetime
+    dates_parsed = parse_date_time(
+      dates,
+      orders = 'mdy'
+    )
+  )
+# # A tibble: 4 × 2
+#   dates          dates_parsed       
+#   <chr>          <dttm>             
+# 1 June 21, 2023  2023-06-21 00:00:00
+# 2 April 25, 2023 2023-04-25 00:00:00
+# 3 May 11, 2023   2023-05-11 00:00:00
+# 4 06-05-2023     2023-06-05 00:00:00
+```
+
+
+
+```{r}
+toy_data |> 
+  mutate(
+    dates_parsed = parse_date_time(
+      dates,
+      # dmy gets preference when in doubt
+      orders = c('dmy', 'mdy')
+    ),
+    dates_parsed2 = parse_date_time(
+      dates,
+      orders = c('mdy')
+    )
+  )
+```
+
+
+
+
+```{r}
+my_preference <- function(trained, drop = FALSE) {
+  preferenced_logical <- str_starts(names(trained), '%d')
+  c(
+    names(trained)[preferenced_logical], 
+    names(trained)[!preferenced_logical]
+  )
+}
+
+
+toy_data |> 
+  mutate(
+    parsed_wrong_order = parse_date_time(
+      dates,
+      orders = c('mdy', 'dmy')
+    ),
+    parsed_order_enforced = parse_date_time(
+      dates,
+      orders = c('mdy', 'dmy'),
+      select_formats = my_preference
+    )
+  )
+# # A tibble: 4 × 3
+#   dates          parsed_wrong_order  parsed_order_enforced
+#   <chr>          <dttm>              <dttm>               
+# 1 June 21, 2023  2023-06-21 00:00:00 2023-06-21 00:00:00  
+# 2 April 25, 2023 2023-04-25 00:00:00 2023-04-25 00:00:00  
+# 3 May 11, 2023   2023-05-11 00:00:00 2023-05-11 00:00:00  
+# 4 06-05-2023     2023-06-05 00:00:00 2023-05-06 00:00:00 
+```
+
+
