@@ -1,0 +1,56 @@
+
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+sp500_opens <- gt::sp500 |> 
+  select(date, open)
+sp500_opens
+```
+
+
+```{r}
+# Manually with {lubridate} :(
+sp500_opens |> 
+  mutate(
+    day = day(date),
+    month = month(date),
+    year = year(date)
+  )
+```
+
+
+```{r}
+# {timetk} computes the same AND MORE
+sp500_opens |> 
+  timetk::tk_augment_timeseries_signature(date)
+```
+
+
+```{r}
+## Create your own function that extracts only your desired time units
+get_selected_time_signature <- function(data, date_var, time_units) {
+  data |> 
+    timetk::tk_augment_timeseries_signature({{date_var}}) |> 
+    select(
+      all_of(
+        c(colnames(data), time_units)
+      )
+    )
+}
+
+sp500_opens |> 
+  get_selected_time_signature(
+    date_var = date,
+    time_units = c('year', 'quarter', 'month', 'day')
+  )
+
+```
+
+
+```{r}
+timetk::tk_get_timeseries_signature(sp500_opens$date)
+```
+
+
