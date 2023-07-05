@@ -7,7 +7,6 @@ setwd(here::here('35_Jul_05_2023'))
 
 ```{r}
 library(tidyverse)
-
 penguins_data <- palmerpenguins::penguins |> 
   filter(!is.na(sex)) 
 
@@ -15,7 +14,8 @@ penguins_plot <- penguins_data |>
   ggplot(aes(x = body_mass_g, fill = species)) +
   geom_histogram(position = 'identity', alpha = 0.7) +
   theme_minimal(base_size = 16) +
-  scale_fill_manual(values = thematic::okabe_ito(3))
+  scale_fill_manual(values = thematic::okabe_ito(3)) 
+penguins_plot
 ```
 
 
@@ -59,6 +59,7 @@ basic_line_chart
 
 
 ```{r}
+# Code for line chart on GitHub
 basic_line_chart +
   gghighlight(
     person %in% c('alone', 'children'), 
