@@ -1,0 +1,266 @@
+
+Basic plot
+
+```{r}
+library(tidyverse)
+penguins <- palmerpenguins::penguins |> 
+  filter(!is.na(sex))
+
+basic_plot <- penguins |> 
+  ggplot(aes(x = bill_length_mm, y = body_mass_g, fill = species)) +
+  geom_point(shape = 21, size = 5, alpha = 0.85, color = 'grey10') +
+  labs(
+    x = 'Bill length (in mm)',
+    y = element_blank(),
+    fill = 'Species',
+    title = 'Penguins from the Palmer Archipelago',
+    subtitle = 'Penguin weights (in g)',
+    caption = 'Data: {palmerpenguins} R package'
+  )
+basic_plot
+```
+
+Add theme_minimal
+
+```{r}
+basic_plot +
+  theme_minimal()
+```
+
+Increase font size and set a nice base family
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro')
+```
+
+Change colors e.g. Okabe Ito
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6))
+```
+
+Or using colors from [Coolors](https://coolors.co/generate)
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = c('#da2c38', '#FED18C', '#30C5FF'))
+```
+
+Pro tip: Fix colors to species via names
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(
+    values = c(
+      'Adelie'= '#da2c38', 
+      'Chinstrap'= '#FED18C', 
+      'Gentoo'= '#30C5FF'
+    )
+  )
+```
+
+Get rid of too many grid lines
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank()
+  )
+```
+
+Make lines less noticeable
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    )
+  )
+```
+
+Move plot titles to left
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot'
+  )
+```
+
+Move caption to right
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot'
+  )
+```
+
+
+Make title flashy, i.e. larger and different font.
+Pro tip: Use `rel()` to make size relative to base size.
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7)
+    )
+  )
+```
+
+Give some room to y-axis label
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7),
+      margin = margin(b = 7, unit = 'mm')
+    )
+  )
+```
+
+Change subtitle text
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7),
+      margin = margin(b = 7, unit = 'mm')
+    ),
+    plot.subtitle = element_text(size = rel(1.1))
+  )
+```
+
+
+Optional: Make texts lighter.
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7),
+      margin = margin(b = 7, unit = 'mm')
+    ),
+    plot.subtitle = element_text(size = rel(1.1)),
+    text = element_text(color = 'grey20'),
+    axis.text = element_text(color = 'grey30'),
+  )
+```
+
+Optional: Add framing to panel
+
+```{r}
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7),
+      margin = margin(b = 7, unit = 'mm')
+    ),
+    plot.subtitle = element_text(size = rel(1.1)),
+    text = element_text(color = 'grey20'),
+    axis.text = element_text(color = 'grey30'),
+    panel.background = element_rect(color = 'grey90')
+  )
+```
+
+
+Move to a function
+
+```{r}
+my_base_theme <- function() {
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(
+      color = 'grey90', linetype = 2
+    ),
+    plot.title.position = 'plot',
+    plot.caption.position = 'plot',
+    plot.title = element_text(
+      family = 'Merriweather', 
+      size = rel(1.7),
+      margin = margin(b = 7, unit = 'mm')
+    ),
+    plot.subtitle = element_text(size = rel(1.1)),
+    text = element_text(color = 'grey20'),
+    axis.text = element_text(color = 'grey30'),
+    panel.background = element_rect(color = 'grey90')
+  )
+}
+
+basic_plot +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  scale_fill_manual(values = thematic::okabe_ito(6)) +
+  my_base_theme()
+```
