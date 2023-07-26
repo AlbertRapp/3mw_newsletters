@@ -1,0 +1,103 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+Use Tektur font
+
+```{r}
+library(tidyverse)
+palmerpenguins::penguins |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm, col = species)) +
+  geom_point() +
+  labs(title = 'This is a title') +
+  theme(
+    plot.title = element_text(
+      size = 42, 
+      family = 'Tektur', 
+      face = 'bold'
+    )
+  ) 
+```
+
+
+Annotate FontAwesome Heart
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm, col = species)) +
+  geom_point() +
+  labs(title = 'This is a title') +
+  theme(
+    plot.title = element_text(
+      size = 42, 
+      family = 'Tektur', 
+      face = 'bold'
+    )
+  ) +
+  annotate(
+    'text',
+    x = 55,
+    y = 175,
+    label = 'heart',
+    family = 'Font Awesome 6 Free',
+    color = 'firebrick4',
+    size = 25
+  )
+```
+
+
+Find fonts
+
+```{r}
+systemfonts::system_fonts() |> 
+  filter(str_detect(name, 'Awesome')) |> 
+  select(name, family, style, path)
+# A tibble: 3 × 4
+#   name                       family                style   path       
+#   <chr>                      <chr>                 <chr>   <chr>      
+# 1 FontAwesome6Free-Regular   Font Awesome 6 Free   Regular "C:\\Users...
+# 2 FontAwesome6Free-Solid     Font Awesome 6 Free   Solid   "C:\\Users...
+# 3 FontAwesome6Brands-Regular Font Awesome 6 Brands Regular "C:\\Users...
+```
+
+
+Use solid heart (after registration)
+
+
+
+
+```{r}
+systemfonts::system_fonts() |> 
+  filter(str_detect(name, 'Awesome'), style == 'Solid') |> 
+  pull(path) |> 
+  systemfonts::register_font(
+    'Font Awesome 6 Free Solid',
+    plain = _
+  )
+
+palmerpenguins::penguins |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm, col = species)) +
+  geom_point() +
+  labs(title = 'This is a title') +
+  theme(
+    plot.title = element_text(
+      size = 42, 
+      family = 'Tektur', 
+      face = 'bold'
+    )
+  ) +
+  annotate(
+    'text',
+    x = 55,
+    y = 175,
+    label = 'heart',
+    family = 'Font Awesome 6 Free Solid',
+    color = 'firebrick4',
+    size = 25
+  )
+
+```
+
