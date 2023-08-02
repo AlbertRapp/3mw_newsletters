@@ -4,7 +4,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-
 Use Tektur font
 
 ```{r}
@@ -21,7 +20,6 @@ palmerpenguins::penguins |>
     )
   ) 
 ```
-
 
 Annotate FontAwesome Heart
 
@@ -48,7 +46,6 @@ palmerpenguins::penguins |>
   )
 ```
 
-
 Find fonts
 
 ```{r}
@@ -63,11 +60,7 @@ systemfonts::system_fonts() |>
 # 3 FontAwesome6Brands-Regular Font Awesome 6 Brands Regular "C:\\Users...
 ```
 
-
 Use solid heart (after registration)
-
-
-
 
 ```{r}
 systemfonts::system_fonts() |> 
@@ -100,4 +93,3 @@ palmerpenguins::penguins |>
   )
 
 ```
-
