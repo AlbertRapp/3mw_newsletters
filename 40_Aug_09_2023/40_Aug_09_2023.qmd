@@ -1,0 +1,234 @@
+
+
+```{r}
+setwd(here::here('40_Aug_09_2023'))
+library(tidyverse)
+```
+
+
+
+
+```{r}
+set.seed(2345345)
+N <- 100
+generated_data <- tibble(
+  year = rep(seq(1950, 2020, 10), each = N),
+  category = sample(
+    paste0('Cat.', 1:4), 
+    prob = c(1 / 8, 1 / 2, 1 / 4, 1/8), 
+    size = length(year), 
+    replace = TRUE
+  ) 
+) |> 
+  count(year, category)
+generated_data
+# # A tibble: 32 × 3
+#     year category     n
+#    <dbl> <chr>    <int>
+#  1  1950 Cat.1       14
+#  2  1950 Cat.2       53
+#  3  1950 Cat.3       25
+#  4  1950 Cat.4        8
+#  5  1960 Cat.1       17
+#  6  1960 Cat.2       37
+#  7  1960 Cat.3       26
+#  8  1960 Cat.4       20
+#  9  1970 Cat.1       18
+# 10  1970 Cat.2       51
+```
+
+
+```{r}
+standard_heatmap <- generated_data |> 
+  ggplot(aes(year, category, fill = n)) +
+  geom_tile(color = 'white') +
+  labs(
+    x = element_blank(), 
+    y = element_blank(), 
+    fill = 'Count',
+    title = 'This is a fabricated heat map',
+    subtitle = 'Let\'s make this look nice'
+  ) +
+  theme_minimal(base_size = 20, base_family = 'Source Sans Pro')
+```
+
+
+
+Now let's move the guide and titles.
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    legend.position = 'top'
+  )
+```
+
+
+Make the color bar nicer
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    legend.position = 'top'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  )
+```
+
+
+Move the color bar to a better position.
+The moment you to that you need to set `legend.direction` and make some room for the legend (e.g. by setting margins on `plot.subtitle`)
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.4, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  )
+```
+
+
+Get rid of extra spacing (readjust legend position)
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.355, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  ) +
+  coord_cartesian(expand = FALSE)
+```
+
+
+Choose a new color
+Continuous scale that makes sense in this case. 
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.355, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  ) +
+  coord_cartesian(expand = FALSE) +
+  scale_fill_distiller(type = 'seq', palette = 'Reds', direction = 1)
+# direction ensures that darker = higher values
+```
+
+If 25 were a sensible "middle point", then a diverging color would make more sense.
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.355, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  ) +
+  coord_cartesian(expand = FALSE) +
+  scale_fill_distiller(type = 'div')
+```
+
+
+To fix the "midpoint" to a certain value, you could also use `scale_fill_gradient2"
+Colors can be found on https://colorbrewer2.org/#type=diverging&scheme=BrBG&n=5
+
+
+```{r}
+standard_heatmap +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.355, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  ) +
+  coord_cartesian(expand = FALSE) +
+  scale_fill_gradient2 (
+    low = '#018571',
+    mid = "#f5f5f5",
+    high = '#a6611a',
+    midpoint = 30,
+  )
+```
+
+Add values to cells.
+Remember to move texts and set color dependent on `generated_data$n`
+
+```{r}
+standard_heatmap +
+  geom_text(
+    aes(label = n),
+    color = if_else(generated_data$n > 30, 'white', 'black'),
+    size = 5.5,
+    hjust = 1,
+    nudge_x = 4.25,
+    nudge_y = -0.3,
+    family = 'Source Sans Pro'
+  ) +
+  theme(
+    plot.title.position = 'plot',
+    plot.subtitle = element_text(margin = margin(b = 3.25, unit = 'cm')),
+    legend.position = c(0.355, 1.125),
+    legend.direction = 'horizontal'
+  ) +
+  guides(
+    fill = guide_colorbar(
+      barwidth = unit(20, 'cm'),
+      barheight = unit(0.5, 'cm'),
+      title.position = 'top'
+    )
+  ) +
+  coord_cartesian(expand = FALSE) +
+  scale_fill_distiller(type = 'seq', palette = 'Reds', direction = 1)
+```
+
+
+
+
