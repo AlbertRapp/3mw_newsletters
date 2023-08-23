@@ -1,0 +1,197 @@
+```{r}
+setwd(here::here('42_Aug_23_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+Alright.
+In today's newsletter, I want to show you how you can combine or how you can visualize uncertainty with ggplot.
+And I also want to explain the involved quantities that are visualized.
+
+# Histograms
+
+Let's let's start with the easiest one, namely histograms.
+Basically, a histogram works in four steps 
+1. Take the full range of your data 
+2. Split that range into a certain amount of equally sized bins
+3. Count how many observation fall into each bin 
+4. Create a bar that for each of those bins indicates the number of oberservations
+
+You can create a histogram by calling the `geom_histogram()` layer and passing the quantity that you want to visualize to the `x`-aesthetic.
+Then, ggplot will calculate for you how many observations of your variable fall into one of 30 equally sized bin (30 is the default but you can change that).
+
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_histogram() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+What you often will also find is that instead of a bar, you create dots that actually stand for the amount of stuff that fell into the bins.
+You can create such a chart by either using `geom_dotplot()` which comes with `{ggplot2}` or you can use `geom_dotsinterval()` from `{ggdist}`.
+I find the latter somewhat more appealing.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  ggdist::geom_dotsinterval() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+# Density chart
+
+Another related visualization is the density chart.
+It is created by performing a so-called kernel density estimation.
+This works as follows:
+
+1. For each data point of the quantity that you want to visualize,  plot, say, a Gaussian bell curve whose peak is center at the corresponding data points 
+2. Average all of the bell curves
+
+Average curves, you say? This means that for each x value, you find the y values of each curve and then average them.
+Long time ago I've actually created a (rudimentary) visualization for all of this.
+Check it out.
+
+ANIMATION here
+
+Just like you can change the bin width of a histogram, you can tweak parameters of the density chart as well.
+For example, you could make the Gaussian bell curve wider or narrower.
+Or you could even replace the Gaussian bell curve by some other [probability density function](https://en.wikipedia.org/wiki/Probability_density_function).
+
+You can create a density chart by replacing `geom_histogram()` from above by `geom_density()`.
+Pretty easy, isn't it?
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_density() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+Or you could use `stat_density()` which does the same but displays the density chart with a filled area by default.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  stat_density() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+
+# Box plots
+
+Finally, let me finish off with with another visualization that gives you less details on the data namely box plots.
+Despite its drawbacks, this visualization gives a neat summary of key quantities that describe the spreat of your data.
+That's why it's still popular.
+
+Let me demonstrate how box plots work by using 9 data points from our palmerpenguins data set and plotting them together with a boxplot.
+For now, imagine that these points are our complete data set.
+
+```{r}
+set.seed(25453)
+palmerpenguins::penguins |> 
+  filter(!is.na(sex)) |>
+  select(body_mass_g) |> 
+  unique() |> 
+  slice_sample(n = 9) |> 
+  ggplot(aes(x = sort(body_mass_g))) +
+  geom_boxplot(width = 0.125, position = position_nudge(y = 0.11)) +
+  geom_point(aes(y = 0.2), size = 4) +
+  geom_text(
+    aes(
+      y = 0.22, 
+      label = seq_along(body_mass_g)
+    ), 
+    size = 6
+  ) +
+  coord_cartesian(ylim = c(0, 0.3)) +
+  scale_y_continuous(breaks = NULL) +
+  labs(x = 'Body weight (in g)', y = element_blank())
+```
+
+Basically, this chart has four key indicators:
+
+1. the left line shows you in what range you can find the **smallest** 25%
+2. the right line shows you in what range you can find the **largest** 25%
+3. the box shows you in what range you can find the **middle** 50% of the data
+4. the thick middle line in the box shows you the **median**. 
+This value is defined by the fact that 50% of the values lie below and above it.
+
+So, the box plot is a pretty neat summary of key thresholds of your data.
+For our full data, you can create it with `geom_boxplot()`.
+Depending on whether you want to have a vertical or horizonal box plot, map the quantity that you want to plot to either the `x`- or `y`-aesthetic. 
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g)) +
+  geom_boxplot() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+But beware that the box plot can be misleading.
+The distribution of the underlying data can be very different but the box plot may look the same.
+
+Think about it.
+The sixth point in our above chart could move anywhere between the 5th and 7th point and the box plot would look the same.
+After all, in our data set of 9, the fifth and the seventh points determine how large the upper half of the box is.
+
+
+This is why it's always a good idea to pair a boxplot with something that helps you to see the distribution of your data more clearly.
+For example, this could be a density plot.
+
+And this brings us to the violin plot which looks like a box plot.
+But instead of the box, it actually shows you the density of the data that you would get from a density plot.
+And then for our viewing pleasure this density is mirrored so that it looks all symmetric.
+
+Want to create this with ggplot?
+Just replace `geom_boxplot()` with `geom_violin()`.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g, y = species)) +
+  geom_violin()  +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+Here, I've also mapped `species` to the `y`-aesthetic because for some reason `geom_violin()` needs a `y`-aesthetic.
+If you only want to have one violin plot, you could map `y` to a fixed string.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g, y = "all data")) +
+  geom_violin() +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+
+Finally, you can combine all violins and box plots by stacking the layers.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g, y = species)) +
+  geom_violin() +
+  geom_boxplot(width = 0.4) +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+  # Change width of the box so that it looks nice inside the violin.
+```
+
+And when you really want to show the data, you can plot the points as well.
+
+```{r}
+palmerpenguins::penguins |> 
+  ggplot(aes(x = body_mass_g, y = species)) +
+  geom_violin() +
+  geom_point(alpha = 0.3, size = 3) +
+  labs(title = 'Penguin weights', x = "Weight (in g)")
+```
+
+Okay, so these were a couple of ways how to visualize uncertainty.
+In the next installment, I will show you how to combine them into one neat visualization
+
