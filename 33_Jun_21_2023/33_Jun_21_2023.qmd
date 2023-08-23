@@ -25,20 +25,23 @@ toy_data
 
 
 ```{r}
+# Use abbreviations to specify how your dates are formatted in the text
+# This is tedious and will not work if date is formatted slightly differently
+# (see results below)
 toy_data |> 
   mutate(
-    dates = parse_date(
+    dates_parsed = parse_date(
       dates,
       format = '%B %d, %Y'
     )
   )
-# A tibble: 4 × 1
-#   dates     
-#   <date>    
-# 1 2023-06-21
-# 2 2023-04-25
-# 3 2023-05-11
-# 4 NA
+# # A tibble: 4 × 2
+#   dates          dates_parsed
+#   <chr>          <date>      
+# 1 June 21, 2023  2023-06-21  
+# 2 April 25, 2023 2023-04-25  
+# 3 May 11, 2023   2023-05-11  
+# 4 06-05-2023     NA   
 ```
 
 
@@ -56,6 +59,8 @@ toy_data |>
 
 
 ```{r}
+# Just give the order of day, month and year to parse_date_time() and
+# it will take care of the rest
 toy_data |> 
   mutate(
     # Watch out! This is from {lubridate}
@@ -84,11 +89,19 @@ toy_data |>
       # dmy gets preference when in doubt
       orders = c('dmy', 'mdy')
     ),
+    # For comparison
     dates_parsed2 = parse_date_time(
       dates,
       orders = c('mdy')
     )
   )
+# # A tibble: 4 × 3
+#   dates          dates_parsed        dates_parsed2      
+#   <chr>          <dttm>              <dttm>             
+# 1 June 21, 2023  2023-06-21 00:00:00 2023-06-21 00:00:00
+# 2 April 25, 2023 2023-04-25 00:00:00 2023-04-25 00:00:00
+# 3 May 11, 2023   2023-05-11 00:00:00 2023-05-11 00:00:00
+# 4 06-05-2023     2023-05-06 00:00:00 2023-06-05 00:00:00
 ```
 
 

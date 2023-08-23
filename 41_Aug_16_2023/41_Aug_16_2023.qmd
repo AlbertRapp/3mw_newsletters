@@ -1,0 +1,52 @@
+
+
+```{r}
+setwd(here::here('41_Aug_16_2023'))
+library(tidyverse)
+```
+
+
+
+```{r}
+palmerpenguins::penguins |> 
+  gtExtras::gt_plt_summary()
+```
+
+
+
+```{r}
+modeldata::ames |> 
+  gtExtras::gt_plt_summary() |> 
+  gt::tab_options(data_row.padding = gt::px(2))
+```
+
+
+```{r}
+gt::towny |> 
+  gtExtras::gt_plt_summary()
+```
+
+
+```{r}
+gt::exibble |> 
+  gtExtras::gt_plt_summary()
+```
+
+
+
+```{r}
+gt::sp500
+```
+
+
+Download Parquet files from https://observablehq.com/@observablehq/pizza-paradise-data
+and open with `{arrow}` like so
+
+```{r}
+order_items <- arrow::read_parquet('data/orderItems@1.parquet') |> 
+  janitor::clean_names()
+```
+
+
+TidyTuesday https://github.com/rfordatascience/tidytuesday
+
