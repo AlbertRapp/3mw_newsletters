@@ -1,0 +1,196 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('46_Sep_20_2023'))
+library(tidyverse)
+```
+
+```{r}
+scatter_plot <- palmerpenguins::penguins |> 
+  filter(!is.na(sex)) |> 
+  ggplot(aes(flipper_length_mm, bill_length_mm, fill = body_mass_g)) +
+  geom_point(shape = 21, size = 5) +
+  labs(
+    x = 'Flipper length (in mm)',
+    y = 'Bill length (in mm)',
+    fill = 'Body weight (in g)',
+    title = 'Penguin measurements'
+  ) +
+  theme_minimal(base_size = 16, base_family = 'Source Sans Pro') +
+  theme(panel.grid.minor = element_blank()) 
+scatter_plot
+```
+
+
+
+```{r}
+scatter_plot  +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) 
+```
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) + 
+  theme(legend.position = 'top') +
+  guides(
+    fill = guide_colourbar(
+      title.position = 'top',
+      barwidth = unit(15, 'cm')
+    )
+  )
+```
+
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) + 
+  theme(legend.position = 'top') +
+  guides(
+    fill = guide_coloursteps(
+      title.position = 'top',
+      barwidth = unit(15, 'cm')
+    )
+  )
+```
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(margin = margin(b = 3, unit = 'cm'))
+  ) 
+```
+
+
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(margin = margin(b = 3, unit = 'cm'))
+  ) +
+  annotate(
+      'tile',
+      y = 64,
+      x = seq(190, 210, 5) + 0.75 * 1:5,
+      width = 5
+  )
+```
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(margin = margin(b = 3, unit = 'cm'))
+  ) +
+  coord_cartesian(ylim = c(30, 60), clip = 'off') +
+  annotate(
+      'tile',
+      y = 64,
+      x = seq(190, 210, 5) + 0.75 * 1:5,
+      width = 5
+  )
+```
+
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(margin = margin(b = 3, unit = 'cm'))
+  ) +
+  coord_cartesian(ylim = c(30, 60), clip = 'off') +
+  annotate(
+      'tile',
+      y = 64,
+      x = seq(190, 210, 5) + 0.75 * 1:5,
+      width = 5,
+      fill = RColorBrewer::brewer.pal(5, 'BuGn'),
+      col = 'grey20'
+  )
+```
+
+
+```{r}
+scatter_plot +
+  scale_fill_distiller(
+    palette = 'BuGn',
+    direction = 1
+  ) +
+  theme(
+    legend.position = 'none',
+    plot.title = element_text(margin = margin(b = 3, unit = 'cm'))
+  ) +
+  coord_cartesian(ylim = c(30, 60), clip = 'off') +
+  annotate(
+      'tile',
+      y = 64,
+      x = seq(190, 210, 5) + 0.75 * 1:5,
+      width = 5,
+      fill = RColorBrewer::brewer.pal(5, 'BuGn'),
+      col = 'grey20'
+  ) +
+  annotate(
+      'text',
+      y = 62.75,
+      x = seq(190, 210, 5)[1:4] + 0.75 * 1:4 + 3,
+      label = (3:6) * 1000,
+      size = 5,
+      fontface = 'bold',
+      family = 'Source Sans Pro'
+  ) +
+  annotate(
+      'text',
+      y = 65.5,
+      x = 188.15,
+      hjust = 0,
+      label = 'Body weight (in g)',
+      size = 6,
+      fontface = 'bold',
+      family = 'Source Sans Pro'
+  ) 
+```
+
+
