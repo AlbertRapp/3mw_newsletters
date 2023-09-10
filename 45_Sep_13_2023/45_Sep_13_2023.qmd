@@ -1,0 +1,164 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('45_Sep_13_2023'))
+library(tidyverse)
+```
+
+
+
+```{r}
+mfr_counts <- gt::gtcars |> 
+  count(mfr) |> 
+  mutate(mfr = fct_reorder(mfr, n))
+
+mfr_counts |> 
+  ggplot() +
+  geom_col(
+    aes(x = n, y = mfr),
+    fill = 'dodgerblue4'
+  ) +
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    title = 'Number of Manufacturers in gt::gtcars'
+  ) +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+  theme(panel.grid.minor = element_blank()) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.05))
+  )
+```
+
+
+```{r}
+#| eval: false
+mfr_counts
+# # A tibble: 19 × 2
+#    mfr               n
+#    <fct>         <int>
+#  1 Acura             1
+#  2 Aston Martin      4
+#  3 Audi              5
+#  4 BMW               5
+#  .....
+```
+
+
+```{r}
+mfr_counts |> 
+  ggplot() +
+  geom_segment(
+    aes(
+      x = 0,
+      xend = n,
+      y = mfr,
+      yend = mfr
+    ),
+    linewidth = 1,
+    color = 'dodgerblue4'
+  ) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    title = 'Number of Manufacturers in gt::gtcars'
+  ) +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+  theme(panel.grid.minor = element_blank()) 
+```
+
+
+```{r}
+mfr_counts |> 
+  ggplot() +
+  geom_segment(
+    aes(
+      x = 0,
+      xend = n,
+      y = mfr,
+      yend = mfr
+    ),
+    color = 'dodgerblue4',
+    linewidth = 1
+  ) +
+  geom_point(
+    aes(x = n, y = mfr),
+    color = 'dodgerblue4',
+    size = 3
+  ) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    title = 'Number of Manufacturers in gt::gtcars'
+  ) +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+  theme(panel.grid.minor = element_blank()) 
+```
+
+
+
+```{r}
+mfr_counts |> 
+  ggplot() +
+  geom_segment(
+    aes(
+      x = 0,
+      xend = n,
+      y = mfr,
+      yend = mfr
+    ),
+    color = 'dodgerblue4',
+    linewidth = 1
+  ) +
+  geom_point(
+    aes(x = n, y = mfr),
+    color = 'dodgerblue4',
+    size = 4
+  ) +
+  scale_x_continuous(
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    title = 'Number of Manufacturers in gt::gtcars'
+  )  +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+```
+
+
+
+
