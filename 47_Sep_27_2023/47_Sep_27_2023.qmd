@@ -1,0 +1,123 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('47_Sep_27_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+# XXXX Exciting Ideas from posit::conf(2023) 
+
+
+Last week, posit::conf(2023) happened and I was there. I had a blast as I met many new friends, people I got acquainted with over the internet and learned lots of new stuff. Oh and my own talk went well too.
+
+Anyway, you're probably not here to listen to me talking about how much fun I had. You probably want to know what's the most exciting news from conf. So let me give you just that.
+
+
+## `glue()` on steroids
+
+One of the talks that just blew me away was Garrick Aden-Buie's talk on the `{epoxy}` package. It's a great tool for creating formatted texts. You can think of it as `glue()` but more powerful. `glue()` on steroids if you will.
+
+With `glue()` it is super simple to spice up your text with data. But the result is not always ideal.
+
+```{r}
+mean_price <- mean(modeldata::ames$Sale_Price)
+glue::glue('The mean sale price is {mean_price}')
+```
+
+Of course, you can style the output but that requires some formatting.
+
+```{r}
+dollar_formatter <- scales::label_dollar()
+mean_price <- mean(modeldata::ames$Sale_Price)
+glue::glue('The mean sale price is {dollar_formatter(mean_price)}')
+```
+
+Creating a formatter function and wrapping your outputs in this is tedious though. With `{epoxy}` you can style your output with simple keywords.
+
+```{r}
+mean_price <- mean(modeldata::ames$Sale_Price)
+epoxy::epoxy('The mean sale price is {.dollar mean_price}')
+```
+
+The cool thing about this is that you can also use multiple formatting keywords. For example, you could also make your value bold. This will use Markdown formatting.
+
+```{r}
+epoxy::epoxy('The mean sale price is {.bold .dollar mean_price}') 
+```
+
+I think this will have huge applications in automated reports. But `{epoxy}` can also be used in Shiny apps. More on that next week.
+
+## Shinylive for R
+
+Speaking of Shiny, there's huge news on that front too. Joe Cheng's talk announced that we have Shinylive for R-Shiny now. Previously, that was only available for Py-Shiny.
+
+This means that you can potentially host your Shiny apps without a server like shinyapps.io but could instead just upload your changes to, say, GitHub pages.
+Of course, there are still a lot of limitations to this approach. But as with all new software, I'm sure we will see huge improvements on that in the next couple of weeks.
+
+One thing I look forward to use is the ability to run Shiny apps in Quarto docs. For example, [the Python for Shiny docs](https://shiny.posit.co/py/api/) already use Shinylive to showcase how Shiny apps work in action.
+
+## More interactive Quarto
+
+The engine that makes Shinylive possible is Web Assembly (`wasm`). In another talk, James Balamuta demonstrates how that can be used to make Quarto docs more interactive for teaching purposes. 
+
+Just like [the Python for Shiny docs](https://shiny.posit.co/py/api/) demonstrates, you can leverage `wasm` to let students run R code in their browser. Need another example of how that's useful for teaching? Here's David Granjon showing you how to build collapsible cards with `bslib` [on LinkedIn](https://www.linkedin.com/posts/david-granjon-88625968_rstats-positconf2023-activity-7111333399323136001-41DA?utm_source=share&utm_medium=member_desktop) 
+
+---
+
+# The interactive Quarto train keeps going
+
+Another one of my personal highlights this conf was [Deepsha Menghani's talk](https://www.linkedin.com/in/deepshamenghani/) on leveraging animations and interactive to make Quarto presentations more engaging. You can find her slides for that talk [on here website](https://deepshamenghani.github.io/posit_plotly_crosstalk/#/title-slide).
+
+Basically, she leverages `{plotly}` and `{crosstalk}` to create little chart animations or make slides react to points and clicks. Effectively, each slide can turn into a miniature dashboard. All without a Shiny app that needs a server!
+
+---
+
+# Shiny for Python
+
+I must say that this conf piqued my curiosity about learning Shiny for Python. As [Gordon Shotwell](https://www.linkedin.com/in/gshotwell/) puts it, there are lots of reasons to learn Shiny for Python:
+
+- You already mostly know the way it works from R
+- It's a great way to immerse yourself into the Python world
+- Your DevOps team at work is more likely to know how to handle a Python script and may therefore be more willing to help.
+
+Thankfully, Gordon also uploaded the [workshop materials](https://posit-dev.github.io/shiny-python-workshop-2023/) to the Shiny for Python workshop. Probably a great resource for getting started (and it comes with interactive slides full of Python for Shiny apps).
+
+---
+
+## Where's the AI stuff?
+
+Oh yeah, everyone probably want to hear about AI, right? I have to admit that I haven't really joined the AI bandwagon yet but there were some talks that made even me more optimistic:
+
+- Jeremy Howard's keynote on large language models was pretty informative about AI's possibilities and limitations
+- [Thomas Mock](https://www.linkedin.com/in/jthomasmock/) gave a neat talk on RStudio's new integration of GitHub Copilot. If you want to try it yourself, then currently you will have to install one of the daily versions. For a primer on how Copilot works in RStudio, you can check out [Tom's slides](https://colorado.posit.co/rsc/rstudio-copilot/#/TitleSlide)
+- Tom's slides also mentions [the `{chattr}` package](https://github.com/mlverse/chattr). Might be worth a shot trying it out if you want to have a chatGPT-like interface in RStudio.
+
+
+
+
+
+
+
+
+
+

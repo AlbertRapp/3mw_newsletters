@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>sep_27_2023</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="47_Sep_27_2023_files/libs/clipboard/clipboard.min.js"></script>
+<script src="47_Sep_27_2023_files/libs/quarto-html/quarto.js"></script>
+<script src="47_Sep_27_2023_files/libs/quarto-html/popper.min.js"></script>
+<script src="47_Sep_27_2023_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="47_Sep_27_2023_files/libs/quarto-html/anchor.min.js"></script>
+<link href="47_Sep_27_2023_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="47_Sep_27_2023_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="47_Sep_27_2023_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="47_Sep_27_2023_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="47_Sep_27_2023_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">'47_Sep_27_2023'</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ✔ dplyr     1.1.2     ✔ readr     2.1.4</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ✔ forcats   1.0.0     ✔ stringr   1.5.0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="do">## ✔ ggplot2   3.4.3     ✔ tibble    3.2.1</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">## ✔ purrr     1.0.1     </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## ✖ dplyr::filter() masks stats::filter()</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## ✖ dplyr::lag()    masks stats::lag()</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="do">## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">base_size =</span> <span class="dv">16</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">base_family =</span> <span class="st">'Source Sans Pro'</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="xxxx-exciting-ideas-from-positconf2023" class="level1">
+<h1>XXXX Exciting Ideas from posit::conf(2023)</h1>
+<p>Last week, posit::conf(2023) happened and I was there. I had a blast as I met many new friends, people I got acquainted with over the internet and learned lots of new stuff. Oh and my own talk went well too.</p>
+<p>Anyway, you’re probably not here to listen to me talking about how much fun I had. You probably want to know what’s the most exciting news from conf. So let me give you just that.</p>
+<section id="glue-on-steroids" class="level2">
+<h2 class="anchored" data-anchor-id="glue-on-steroids"><code>glue()</code> on steroids</h2>
+<p>One of the talks that just blew me away was Garrick Aden-Buie’s talk on the <code>{epoxy}</code> package. It’s a great tool for creating formatted texts. You can think of it as <code>glue()</code> but more powerful. <code>glue()</code> on steroids if you will.</p>
+<p>With <code>glue()</code> it is super simple to spice up your text with data. But the result is not always ideal.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mean_price <span class="ot">&lt;-</span> <span class="fu">mean</span>(modeldata<span class="sc">::</span>ames<span class="sc">$</span>Sale_Price)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">'The mean sale price is {mean_price}'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## The mean sale price is 180796.060068259</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Of course, you can style the output but that requires some formatting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dollar_formatter <span class="ot">&lt;-</span> scales<span class="sc">::</span><span class="fu">label_dollar</span>()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mean_price <span class="ot">&lt;-</span> <span class="fu">mean</span>(modeldata<span class="sc">::</span>ames<span class="sc">$</span>Sale_Price)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">'The mean sale price is {dollar_formatter(mean_price)}'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## The mean sale price is $180,796</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Creating a formatter function and wrapping your outputs in this is tedious though. With <code>{epoxy}</code> you can style your output with simple keywords.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mean_price <span class="ot">&lt;-</span> <span class="fu">mean</span>(modeldata<span class="sc">::</span>ames<span class="sc">$</span>Sale_Price)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>epoxy<span class="sc">::</span><span class="fu">epoxy</span>(<span class="st">'The mean sale price is {.dollar mean_price}'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## The mean sale price is $180,796</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The cool thing about this is that you can also use multiple formatting keywords. For example, you could also make your value bold. This will use Markdown formatting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>epoxy<span class="sc">::</span><span class="fu">epoxy</span>(<span class="st">'The mean sale price is {.bold .dollar mean_price}'</span>) </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="do">## The mean sale price is **$180,796**</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I think this will have huge applications in automated reports. But <code>{epoxy}</code> can also be used in Shiny apps. More on that next week.</p>
+</section>
+<section id="shinylive-for-r" class="level2">
+<h2 class="anchored" data-anchor-id="shinylive-for-r">Shinylive for R</h2>
+<p>Speaking of Shiny, there’s huge news on that front too. Joe Cheng’s talk announced that we have Shinylive for R-Shiny now. Previously, that was only available for Py-Shiny.</p>
+<p>This means that you can potentially host your Shiny apps without a server like shinyapps.io but could instead just upload your changes to, say, GitHub pages. Of course, there are still a lot of limitations to this approach. But as with all new software, I’m sure we will see huge improvements on that in the next couple of weeks.</p>
+<p>One thing I look forward to use is the ability to run Shiny apps in Quarto docs. For example, <a href="https://shiny.posit.co/py/api/">the Python for Shiny docs</a> already use Shinylive to showcase how Shiny apps work in action.</p>
+</section>
+<section id="more-interactive-quarto" class="level2">
+<h2 class="anchored" data-anchor-id="more-interactive-quarto">More interactive Quarto</h2>
+<p>The engine that makes Shinylive possible is Web Assembly (<code>wasm</code>). In another talk, James Balamuta demonstrates how that can be used to make Quarto docs more interactive for teaching purposes.</p>
+<p>Just like <a href="https://shiny.posit.co/py/api/">the Python for Shiny docs</a> demonstrates, you can leverage <code>wasm</code> to let students run R code in their browser. Need another example of how that’s useful for teaching? Here’s David Granjon showing you how to build collapsible cards with <code>bslib</code> <a href="https://www.linkedin.com/posts/david-granjon-88625968_rstats-positconf2023-activity-7111333399323136001-41DA?utm_source=share&amp;utm_medium=member_desktop">on LinkedIn</a></p>
+<hr>
+</section>
+</section>
+<section id="the-interactive-quarto-train-keeps-going" class="level1">
+<h1>The interactive Quarto train keeps going</h1>
+<p>Another one of my personal highlights this conf was <a href="https://www.linkedin.com/in/deepshamenghani/">Deepsha Menghani’s talk</a> on leveraging animations and interactive to make Quarto presentations more engaging. You can find her slides for that talk <a href="https://deepshamenghani.github.io/posit_plotly_crosstalk/#/title-slide">on here website</a>.</p>
+<p>Basically, she leverages <code>{plotly}</code> and <code>{crosstalk}</code> to create little chart animations or make slides react to points and clicks. Effectively, each slide can turn into a miniature dashboard. All without a Shiny app that needs a server!</p>
+<hr>
+</section>
+<section id="shiny-for-python" class="level1">
+<h1>Shiny for Python</h1>
+<p>I must say that this conf piqued my curiosity about learning Shiny for Python. As <a href="https://www.linkedin.com/in/gshotwell/">Gordon Shotwell</a> puts it, there are lots of reasons to learn Shiny for Python:</p>
+<ul>
+<li>You already mostly know the way it works from R</li>
+<li>It’s a great way to immerse yourself into the Python world</li>
+<li>Your DevOps team at work is more likely to know how to handle a Python script and may therefore be more willing to help.</li>
+</ul>
+<p>Thankfully, Gordon also uploaded the <a href="https://posit-dev.github.io/shiny-python-workshop-2023/">workshop materials</a> to the Shiny for Python workshop. Probably a great resource for getting started (and it comes with interactive slides full of Python for Shiny apps).</p>
+<hr>
+<section id="wheres-the-ai-stuff" class="level2">
+<h2 class="anchored" data-anchor-id="wheres-the-ai-stuff">Where’s the AI stuff?</h2>
+<p>Oh yeah, everyone probably want to hear about AI, right? I have to admit that I haven’t really joined the AI bandwagon yet but there were some talks that made even me more optimistic:</p>
+<ul>
+<li>Jeremy Howard’s keynote on large language models was pretty informative about AI’s possibilities and limitations</li>
+<li><a href="https://www.linkedin.com/in/jthomasmock/">Thomas Mock</a> gave a neat talk on RStudio’s new integration of GitHub Copilot. If you want to try it yourself, then currently you will have to install one of the daily versions. For a primer on how Copilot works in RStudio, you can check out <a href="https://colorado.posit.co/rsc/rstudio-copilot/#/TitleSlide">Tom’s slides</a></li>
+<li>Tom’s slides also mentions <a href="https://github.com/mlverse/chattr">the <code>{chattr}</code> package</a>. Might be worth a shot trying it out if you want to have a chatGPT-like interface in RStudio.</li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
