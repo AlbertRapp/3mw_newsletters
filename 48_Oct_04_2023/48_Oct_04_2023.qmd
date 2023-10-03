@@ -1,0 +1,188 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('48_Oct_04_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+# {expoxy} aka. `glue()` on Steroids
+
+
+```{r}
+# Compute some generic summary to displayed in a text
+mean_price <- mean(modeldata::ames$Sale_Price)
+
+# No formatting with glue()
+glue::glue('The mean sale price is {mean_price}')
+
+# Use built-in formatting option with `.dollar`
+epoxy::epoxy('The mean sale price is {.dollar mean_price}')
+```
+
+---
+
+# Combine multiple formatters
+
+```{r}
+epoxy::epoxy('The mean sale price is {.bold .dollar mean_price}')
+```
+
+
+
+```{r}
+#| error: true
+epoxy::epoxy('The mean sale price is {.dollar .bold mean_price}')
+```
+
+---
+
+# Render text instead of Markdown
+
+
+```{r}
+epoxy::epoxy_html('The mean sale price is {{.bold .dollar mean_price}}')
+```
+
+
+
+
+
+![](screenshot_class.png)
+
+
+
+```{r}
+epoxy::epoxy_html('The mean sale price is {{@bold @dollar mean_price}}')
+```
+
+
+
+
+```{r}
+epoxy::epoxy_html('The mean sale price is {{.dollar.bold mean_price}}')
+```
+
+![](screenshot_combined_classes.png)
+
+
+---
+
+# Write whole chunks
+
+```{r}
+divider_number <- 12
+random_number <- rpois(n = 1, lambda = 54)
+```
+
+
+
+````{verbatim}
+  ```{epoxy}
+  Here's more text. 
+  You can include the value from before, i.e. {.bold .dollar mean_price}.
+  You can even do some calculation and divide your number by {.bold divider_number}.
+  This will give you a value of {.bold .dollar mean_price / divider_number}.
+  Not sure why it makes sense to compute such a number but hey this is just a short demo.
+  So, bear with me here.
+  Thank you for that, here's another number:  {.bold random_number}
+  ```
+````
+
+
+
+```{epoxy}
+Here's more text. 
+You can include the value from before, i.e. {.bold .dollar mean_price}.
+You can even do some calculation and divide your number by {.bold divider_number}.
+This will give you a value of {.bold .dollar mean_price / divider_number}.
+Not sure why it makes sense to compute such a number but hey this is just a short demo.
+So, bear with me here.
+Thank you for that, here's another number:  {.bold random_number}
+```
+
+---
+
+
+# Avoid code repetition
+
+````{verbatim}
+  ```{epoxy, .transformer=epoxy::epoxy_transform('inline', 'bold')}
+  Here's more text. 
+  You can include the value from before, i.e. {.dollar mean_price}.
+  You can even do some calculation and divide your number by {divider_number}.
+  This will give you a value of {.dollar mean_price / divider_number}.
+  Not sure why it makes sense to compute such a number but hey this is just a short demo.
+  So, bear with me here.
+  Thank you for that, here's another number:  {random_number}
+  ```
+````
+
+Note that although I use this in a Quarto file to generate an HTML-file, I could use single-brackets. If I want to enforce the behavior of `epoxy_html()` (that can also add CSS classes), I will have to use an `{epoxy_html}` chunk.
+In any case, the rendered text looks like this:
+
+```{epoxy, .transformer=epoxy::epoxy_transform('inline', 'bold')}
+Here's more text. 
+You can include the value from before, i.e. {.dollar mean_price}.
+You can even do some calculation and divide your number by {divider_number}.
+This will give you a value of {.dollar mean_price / divider_number}.
+Not sure why it makes sense to compute such a number but hey this is just a short demo.
+So, bear with me here.
+Thank you for that, here's another number:  {random_number}
+```
+
+
+---
+
+# It's not all about the numbers
+
+
+```{r}
+bad_title <- "the INPUT was MESSED UP"
+epoxy::epoxy(
+  'This is a formatted title: {.titlecase .lowercase bad_title}'
+)
+```
+
+
+```{r}
+epoxy::epoxy(
+  '{1:4}. "{letters[1:4]}" is for {c("apple", "banana", "coconut", "donut")}'
+)
+```
+
+
+
+```{r}
+epoxy::epoxy(
+  '{1:4}. "{.and letters[1:4]}" is for {c("apple", "banana", "coconut", "donut")}'
+)
+```
+
+
+
+
+
+
+
+
+
+
