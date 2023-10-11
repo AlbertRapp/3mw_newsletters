@@ -1,0 +1,173 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('49_Oct_11_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+#| eval: false
+ui_epoxy_html(
+  .id = "movie_info",
+  h2('A short description about {{ title }}'),
+  p(
+    "{{ em title }} was released",
+    "in {{ strong year }}.",
+    "It was directed by {{ director }}",
+    "and was rated {{ rated }}."
+  )
+)
+```
+
+
+
+```{r}
+#| eval: false
+output$movie_info <- render_epoxy(.list = movie())
+```
+
+
+```{r}
+# # A tibble: 1 × 18
+#   imdb_id bechdel_rating  year title        budget  domgross  intgross plot  rated language country
+#   <chr>            <dbl> <dbl> <chr>         <dbl>     <dbl>     <dbl> <chr> <chr> <chr>    <chr>  
+# 1 1375666              3  2010 Inception 160000000 292576195 832584416 A sk… PG-13 English… USA, UK
+# # ℹ 7 more variables: imdb_rating <dbl>, director <chr>, actors <chr>, genre <chr>, awards <chr>,
+# #   runtime <int>, poster <chr>
+```
+
+
+
+```{.r}
+ui_epoxy_markdown(
+    .id = "movie_info",
+"
+## A short description about {{ title }}
+
+{{ em title }} was released in {{ strong year }}. 
+It was directed by {{ director }} and was rated {{ rated }}.
+"
+)
+```
+
+
+
+```{.r}
+ui_epoxy_markdown(
+  .id = "movie_info",
+  includeMarkdown('UI_text.md')
+)
+```
+
+
+
+```{.md}
+## A short description about {{.red_class title }}
+
+{{ em.red_class title }} was released in {{ strong year }}. 
+It was directed by {{ director }} and was rated {{ rated }}.
+```
+
+
+
+```{.r}
+tags$style('.red_class {color: red;}')
+```
+
+
+
+```{r}
+library(shiny)
+library(epoxy)
+
+movie_choices <- bechdel$imdb_id
+names(movie_choices) <- bechdel$title
+
+ui <- fixedPage(
+  div(
+    selectInput("movie", "Pick a movie", choices = movie_choices),
+    style = 'margin-top:20px;'
+  ),
+  ui_epoxy_html(
+    .id = "movie_info",
+    h2('A short description about {{ title }}'),
+    p(
+      "{{ em title }} was released",
+      "in {{ strong year }}.",
+      "It was directed by {{ director }}",
+      "and was rated {{ rated }}."
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  movie <- reactive({
+    # Use the inputs to filter a single row
+    bechdel[bechdel$imdb_id == input$movie, ]
+  })
+
+  # Pass the reactive data frame to
+  # the .list argument of render_epoxy()
+  output$movie_info <- render_epoxy(.list = movie())
+}
+
+#shinyApp(ui, server)
+```
+
+
+```{r}
+library(shiny)
+library(epoxy)
+
+movie_choices <- bechdel$imdb_id
+names(movie_choices) <- bechdel$title
+
+ui <- fixedPage(
+  tags$style('.red_class {color: red;}'),
+  selectInput("movie", "Pick a movie", choices = movie_choices),
+  ui_epoxy_markdown(
+    .id = "movie_info",
+    includeMarkdown('UI_text.md')
+  )
+)
+
+server <- function(input, output, session) {
+  movie <- reactive({
+    # Use the inputs to filter a single row
+    bechdel[bechdel$imdb_id == input$movie, ]
+  })
+
+  # Pass the reactive data frame to
+  # the .list argument of render_epoxy()
+  output$movie_info <- render_epoxy(.list = movie())
+}
+
+#shinyApp(ui, server)
+```
+
+
+
+
+
+
