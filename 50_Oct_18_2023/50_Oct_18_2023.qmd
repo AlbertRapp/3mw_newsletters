@@ -1,0 +1,262 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('50_Oct_18_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+---
+
+# Plotting a single function
+
+
+```{r}
+set.seed(45345)
+fake_dat <- tibble(
+  x = seq(-5, 5, length.out = 1000),
+  y = x^3 + rnorm(1000, mean = 0, sd = 15)
+)
+
+point_plot <- fake_dat |> 
+  ggplot(aes(x, y)) +
+  geom_point(col = "#0072B2", alpha = 0.15, size = 3)
+point_plot
+```
+
+
+
+```{r}
+point_plot +
+  stat_function(
+    fun = \(x) x^3, # Put formula from model into a function
+    col = "#009E73",
+    linewidth = 2.5,
+    lineend = 'round'
+  ) +
+  labs(title = 'Any function can be plotted with stat_function()')
+```
+
+---
+
+
+```{r}
+penguins <- palmerpenguins::penguins |> 
+  filter(!is.na(sex))
+
+grouped_penguins <-  penguins |> 
+  mutate(species = if_else(species == 'Gentoo', species, 'Others'))
+```
+
+
+
+```{r}
+# Define some colors for later use
+penguin_colors <- c("#E69F00", "#009E73", "#0072B2", 'grey80')
+names(penguin_colors) <- c(
+  unique(penguins$species |> as.character()), 
+  'Others'
+)
+
+density_chart <- grouped_penguins |> 
+  ggplot() +
+  geom_density(
+    aes(x = body_mass_g, fill = species), 
+    alpha = 0.8,
+    col = NA
+  ) +
+  labs(
+    x = 'Body weight (in g)',
+    y = element_blank(),
+    title = 'Penguin weights are somewhat normally distributed',
+    fill = 'Species'
+  ) +
+  scale_fill_manual(values = penguin_colors) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.025)))
+density_chart
+```
+
+
+
+```{r}
+params_grouped_penguins <- grouped_penguins |> 
+  summarize(
+    mean_body_mass_g = mean(body_mass_g),
+    sd_body_mass_g   = sd(body_mass_g),
+    .by              = species
+  )
+# A tibble: 2 × 3
+#   species mean_body_mass_g sd_body_mass_g
+#   <chr>              <dbl>          <dbl>
+# 1 Others             3715.           436.
+# 2 Gentoo             5092.           501.
+```
+
+
+
+```{r}
+dnorm(seq(3500, 3800, 100), mean = 3715, sd = 436)
+```
+
+
+
+```{r}
+#| eval: false
+stat_function(
+  fun = \(x) dnorm(
+    x, 
+    mean = mean_body_mass_g,
+    sd = sd_body_mass_g
+  )
+)
+```
+
+
+```{r}
+fun_layers <- params_grouped_penguins |> 
+  pmap(
+    ~{
+      # Pass current parameters to new list
+        l <- list(...)
+        
+      # Use list to put parameters into correct place in dnorm()
+        stat_function(
+          fun = \(x) dnorm(
+            x, 
+            mean = l$mean_body_mass_g,
+            sd = l$sd_body_mass_g
+          ),
+          
+          # Add some aesthetics as well
+          linewidth = 1,
+          linetype = if (l$species == 'Gentoo') 2 else 3
+        )
+      }
+  )
+```
+
+```{r}
+density_chart +
+  fun_layers
+```
+
+
+```{r}
+facet_plot <- penguins |> 
+  ggplot() +
+  geom_density(
+    aes(x = body_mass_g, fill = species),
+    col = NA
+  ) +
+  facet_wrap(vars(species), ncol = 1) +
+  labs(
+    x = 'Body weight (in g)',
+    y = element_blank(),
+    title = 'Penguin weights are somewhat normally distributed'
+  ) +
+  scale_fill_manual(values = penguin_colors) +
+  scale_y_continuous(
+    breaks = c(0, 6e-4),
+    labels = scales::label_comma(),
+    expand = expansion(mult = c(0, 0.005))
+  ) +
+  theme(legend.position = 'none')
+facet_plot
+```
+
+
+
+
+```{r}
+params_penguins <- penguins |> 
+  summarize(
+    mean_body_mass_g = mean(body_mass_g),
+    sd_body_mass_g   = sd(body_mass_g),
+    .by              = species
+  )
+# A tibble: 3 × 3
+#   species   mean_body_mass_g sd_body_mass_g
+#   <fct>                <dbl>          <dbl>
+# 1 Adelie               3706.           459.
+# 2 Gentoo               5092.           501.
+# 3 Chinstrap            3733.           384.
+```
+
+
+
+
+```{r}
+range_body_mass <- range(penguins$body_mass_g)
+
+computed_vals <- params_penguins |> 
+  mutate(
+    x = list( # wrap vector in list() to save whole vector into the cell
+      seq(range_body_mass[1], range_body_mass[2], 1)
+    ),
+    y = pmap(
+      list(x = x, mean = mean_body_mass_g, sd = sd_body_mass_g),
+      ~{
+        l <- list(...)
+        # Compute manually here with dnorm()
+        dnorm(l$x, mean = l$mean, sd = l$sd)
+      }
+    )
+  ) |> 
+  select(species, x, y)
+computed_vals
+```
+
+```{r}
+coords_penguins <- computed_vals |> 
+  unnest(cols = c(x, y))
+# # A tibble: 10,803 × 3
+#    species     x         y
+#    <fct>   <dbl>     <dbl>
+#  1 Adelie   2700 0.0000784
+#  2 Adelie   2701 0.0000788
+#  3 Adelie   2702 0.0000791
+#  4 Adelie   2703 0.0000795
+#  5 Adelie   2704 0.0000799
+#  ....
+```
+
+
+```{r}
+facet_plot +
+   geom_line(
+    data = coords_penguins,
+    aes(x = x, y = y),
+    linetype = 2,
+    linewidth = 1
+  ) 
+
+```
+
+
+
+
+
+
+
+
+
