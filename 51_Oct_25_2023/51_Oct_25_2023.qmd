@@ -1,0 +1,186 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('51_Oct_25_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+library(tidyverse)
+data_prep <- economics |> 
+  mutate(
+    psavert = psavert / 100
+  )
+data_prep
+```
+
+
+
+```{r}
+library(crosstalk)
+shared_data <- SharedData$new(data_prep)
+```
+
+
+```{r}
+#| eval: false
+# Don't forget the ~ to specify the targeted column
+filter_slider("date", "Date", shared_data, ~date)
+```
+
+
+
+```{r}
+#| eval: false
+gg_plt <- ggplot(shared_data) + 
+  geom_point(
+    aes(date, psavert),
+    alpha = 0.5,
+    size = 2.5,
+    col = '#78C2AD'
+  ) +
+  geom_smooth(
+    aes(date, psavert), 
+    linewidth = 2, 
+    col = '#F3969A'
+  ) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  theme_minimal(base_size = 16) +
+  labs(
+    x = element_blank(), 
+    y = 'Personal Savings Rate',
+    title = '{crosstalk} lives!'
+  )
+gg_plt
+```
+
+```{r}
+#| eval: false
+library(plotly)
+ggplotly(gg_plt)
+```
+
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  widths = c(3, NA) # NA means fill remaining space
+)
+```
+
+
+```{r}
+loess_mod <- loess(
+  psavert ~ seq_along(date), 
+  data = economics
+)
+```
+
+
+
+```{r}
+data_prep <- economics |> 
+  mutate(
+    psavert = psavert / 100,
+    loess_pred = predict(
+      loess_mod, 
+      seq_along(psavert)
+    ) / 100
+  )
+shared_data <- SharedData$new(data_prep)
+```
+
+
+```{r}
+#| eval: false
+gg_plt <- ggplot(shared_data) + 
+  geom_point(
+    aes(date, psavert),
+    alpha = 0.5,
+    size = 2.5,
+    col = '#78C2AD'
+  ) +
+  geom_line(
+    # Setting this to a group is necessary or plotly won't plot
+    aes(date, loess_pred, group = 1), 
+    linewidth = 2, 
+    col = '#F3969A'
+  ) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  theme_minimal(base_size = 16) +
+  labs(
+    x = element_blank(), 
+    y = 'Personal Savings Rate',
+    title = '{crosstalk} lives!'
+  )
+```
+
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  widths = c(3, NA) # NA means fill remaining space
+)
+```
+
+
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  DT::datatable(shared_data),
+  widths = c(3, NA, NA) # NA means fill remaining space EQUALLY
+)
+```
+
+```{r}
+shared_data <- SharedData$new(
+  data_prep, 
+  group = 'eco_data' # Set group name
+)
+shared_data_selected_cols <- SharedData$new(
+  data_prep |> select(date, psavert), 
+  group = 'eco_data' # Same name
+)
+```
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  DT::datatable(shared_data_selected_cols), # New data here
+  widths = c(3, NA, NA) 
+)
+```
+
+
+
+
