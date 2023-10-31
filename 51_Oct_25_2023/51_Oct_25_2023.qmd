@@ -53,6 +53,7 @@ filter_slider("date", "Date", shared_data, ~date)
 
 ```{r}
 #| eval: false
+library(plotly)
 gg_plt <- ggplot(shared_data) + 
   geom_point(
     aes(date, psavert),
@@ -77,7 +78,6 @@ gg_plt
 
 ```{r}
 #| eval: false
-library(plotly)
 ggplotly(gg_plt)
 ```
 
