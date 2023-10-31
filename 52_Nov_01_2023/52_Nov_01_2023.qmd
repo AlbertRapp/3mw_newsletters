@@ -1,0 +1,292 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('52_Nov_01_2023'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+
+library(crosstalk)
+library(plotly)
+
+loess_mod <- loess(
+  psavert ~ seq_along(date), 
+  data = economics
+)
+```
+
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(crosstalk)
+library(plotly)
+
+loess_mod <- loess(
+  psavert ~ seq_along(date), 
+  data = economics
+)
+
+data_prep <- economics |> 
+  mutate(
+    psavert = psavert / 100,
+    loess_pred = predict(
+      loess_mod, 
+      seq_along(psavert)
+    ) / 100,
+    date_label = scales::label_date('%B %Y')(date),
+    psavert_label = scales::label_percent()(psavert)
+  ) |> 
+  select(date, date_label, psavert, loess_pred, psavert_label)
+```
+
+
+```{r}
+#| eval: false
+shared_data <- SharedData$new(data_prep, group = 'eco_data')
+shared_data_nice_labels <- SharedData$new(
+  data_prep |> select(date_label, psavert_label), 
+  group = 'eco_data'
+)
+```
+
+```{r}
+#| eval: false
+gg_plt <- ggplot(shared_data) + 
+  geom_point(
+    aes(date, psavert),
+    alpha = 0.5,
+    size = 1.5,
+    col = '#78C2AD'
+  ) +
+  geom_line(
+    aes(date, loess_pred, group = 1), 
+    linewidth = 2, 
+    col = '#F3969A'
+  ) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  theme_minimal(base_size = 16) +
+  labs(
+    x = element_blank(), 
+    y = 'Personal Savings Rate',
+    title = '{crosstalk} lives!'
+  )
+```
+
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  DT::datatable(shared_data_nice_labels), # New data here
+  widths = c(3, NA, NA) 
+)
+```
+
+
+
+```{r}
+#| eval: false
+bscols(
+  filter_slider("date", "Date", shared_data, ~date),
+  ggplotly(gg_plt),
+  DT::datatable(
+    shared_data_nice_labels,
+    options = list(
+      columnDefs = list(
+        list(title = 'Date', targets = 1),
+        list(title = 'Savings Rate', targets = 2)
+      )
+    )
+  ),
+  widths = c(3, NA, NA) 
+)
+```
+
+
+```{r}
+#| eval: false
+bslib::card(
+  bslib::card_body(
+    ggplotly(gg_plt)
+  )
+)
+```
+
+
+```{r}
+#| eval: false
+bslib::layout_columns(
+  bslib::card(
+    bslib::card_body(
+      ggplotly(gg_plt)
+    )
+  ),
+  bslib::card(
+    bslib::card_body(
+      DT::datatable(
+        shared_data_nice_labels,
+        options = list(
+          columnDefs = list(
+            list(title = 'Date', targets = 1),
+            list(title = 'Savings Rate', targets = 2)
+          )
+        )
+      )
+    )
+  ),
+  row_heights = '600px' # Make cards larger
+)
+```
+
+
+```{r}
+#| eval: false
+bslib::page_navbar(
+  title = 'Dashboard without a Shiny server or {webr}',
+  bslib::nav_panel(
+    title =  'Main panel',
+    bslib::layout_columns(
+      bslib::card(
+        bslib::card_body(
+          ggplotly(gg_plt)
+        )
+      ),
+      bslib::card(
+        bslib::card_body(
+          DT::datatable(
+            shared_data_nice_labels,
+            options = list(
+              columnDefs = list(
+                list(title = 'Date', targets = 1),
+                list(title = 'Savings Rate', targets = 2)
+              )
+            )
+          )
+        )
+      ),
+      row_heights = '600px'
+    )
+  ),  
+  bslib::nav_panel(
+    title = 'Here could live another panel'
+  ),
+  theme = bslib::bs_theme(preset = 'minty') # Use a neat theme
+)
+```
+
+
+```{r}
+#| eval: false
+bslib::page_navbar(
+  title = 'Dashboard without a Shiny server or {webr}',
+  bslib::nav_panel(
+    title =  'Main panel',
+    bslib::layout_columns(
+      bslib::card(
+        bslib::card_body(
+          ggplotly(gg_plt)
+        )
+      ),
+      bslib::card(
+        bslib::card_body(
+          DT::datatable(
+            shared_data_nice_labels,
+            options = list(
+              columnDefs = list(
+                list(title = 'Date', targets = 1),
+                list(title = 'Savings Rate', targets = 2)
+              )
+            )
+          )
+        )
+      ),
+      row_heights = '600px'
+    )
+  ),  
+  bslib::nav_panel(
+    title = 'Here could live another panel'
+  ),
+  theme = bslib::bs_theme(preset = 'minty'),
+  sidebar = bslib::sidebar(
+     filter_slider("date", "Date", shared_data, ~date),
+     width = 400
+  )
+)
+```
+
+
+
+```{r}
+#| eval: false
+htmltools::tags$script(
+  src = 'lib/crosstalk-1.2.0/js/crosstalk.min.js'
+)
+```
+
+
+
+```{r}
+#| eval: false
+bslib::page_navbar(
+  title = 'Dashboard without a Shiny server or {webr}',
+  bslib::nav_panel(
+    title =  'Main panel',
+    bslib::layout_columns(
+      bslib::card(
+        bslib::card_body(
+          ggplotly(gg_plt)
+        )
+      ),
+      bslib::card(
+        bslib::card_body(
+          DT::datatable(
+            shared_data_nice_labels,
+            options = list(
+              columnDefs = list(
+                list(title = 'Date', targets = 1),
+                list(title = 'Savings Rate', targets = 2)
+              )
+            )
+          )
+        )
+      ),
+      row_heights = '600px'
+    )
+  ),  
+  bslib::nav_panel(
+    title = 'Here could live another panel'
+  ),
+  theme = bslib::bs_theme(preset = 'minty'),
+  sidebar = bslib::sidebar(
+     filter_slider("date", "Date", shared_data, ~date),
+    htmltools::tags$script(
+      src = 'lib/crosstalk-1.2.0/js/crosstalk.min.js'
+    ), # Insert crosstalk JS
+     width = 400
+  )
+)
+```
+
+
+
+
+
