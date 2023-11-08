@@ -1,0 +1,164 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+
+
+```{r}
+setwd(here::here('53_Nov_08_2023'))
+
+```
+
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+penguins_dat <- palmerpenguins::penguins |> 
+  filter(!is.na(sex)) |> 
+  mutate(
+    bill_ratio = bill_length_mm / bill_depth_mm
+  ) |> 
+  select(body_mass_g, bill_ratio, species)
+```
+
+
+```{r}
+penguins_dat |> 
+  ggplot(aes(body_mass_g, bill_ratio, fill = species)) +
+  geom_point(size = 4, shape = 21, alpha = 0.8) +
+  labs(
+    title = 'I want to plot this Penguins data in Python next',
+    x = 'Body weight (in g)',
+    y = 'Ratio of bill length to bill depth',
+    fill= 'Species'
+  ) +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+```
+
+
+
+```{r}
+#| echo: fenced
+penguins_dat <- as.data.frame(penguins_dat)
+library(reticulate)
+```
+
+
+
+```{python}
+#| echo: fenced
+penguins_data_py = r.penguins_dat
+penguins_data_py
+```
+
+
+
+```{python}
+#| collapse: true
+penguins_data_py
+```
+
+
+
+```{r}
+#| eval: false
+#| echo: fenced
+py_install('plotnine')
+```
+
+
+
+```{python}
+#| echo: fenced
+from plotnine import ggplot, geom_point, labs,\
+                     theme_minimal, theme, element_blank,\
+                     element_rect, aes
+(
+  ggplot(
+    penguins_data_py,
+    aes('body_mass_g', 'bill_ratio', fill = 'species')
+  )
+  + geom_point(size = 4, alpha = 0.8) 
+  + labs(
+    title = 'I want to plot this Penguins data in Python next',
+    x = 'Body weight (in g)',
+    y = 'Ratio of bill length to bill depth',
+    fill= 'Species'
+  ) 
+  + theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) 
+  + theme(
+    panel_grid_minor = element_blank(),
+    plot_background = element_rect(fill = 'white', color = 'white')
+  )
+)
+```
+
+
+
+```{python}
+#| echo: fenced
+import plotnine as pn
+(
+  pn.ggplot(
+    penguins_data_py, 
+    pn.aes('body_mass_g', 'bill_ratio', fill = 'species')
+  ) +
+  pn.geom_point(size = 4, alpha = 0.8) +
+  pn.labs(
+    title = 'This is plotted in Python',
+    x = 'Body weight (in g)',
+    y = 'Ratio of bill length to bill depth',
+    fill= 'Species'
+  ) +
+  pn.theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+  pn.theme(
+    panel_grid_minor = pn.element_blank(),
+    plot_background = pn.element_rect(fill = 'white', color = 'white')
+  )
+)
+```
+
+
+
+
+```{r}
+#| echo: fenced
+py$penguins_data_py |> 
+  ggplot(aes(body_mass_g, bill_ratio, fill = species)) +
+  geom_point(size = 4, shape = 21, alpha = 0.8) +
+  labs(
+    title = 'This is plotted in R and data came from Python',
+    x = 'Body weight (in g)',
+    y = 'Ratio of bill length to bill depth',
+    fill= 'Species'
+  ) +
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+```
+
+
+
+
