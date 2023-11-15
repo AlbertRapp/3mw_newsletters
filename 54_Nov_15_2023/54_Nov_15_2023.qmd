@@ -1,0 +1,138 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('54_Nov_15_2023'))
+```
+
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rvest)
+wiki_url <- 'https://en.wikipedia.org/wiki/Taylor_Swift_albums_discography'
+
+all_tables <- read_html(wiki_url) |> 
+  html_table()
+```
+
+
+
+```{r}
+selected_table <- all_tables[[2]]
+selected_table
+```
+
+
+
+```{r}
+#| message: false
+#| warning: false
+selected_table |> 
+  janitor::row_to_names(row_number = 1) |> 
+  janitor::clean_names()
+```
+
+```{r}
+#| message: false
+#| warning: false
+moved_row_tib <- selected_table |> 
+  janitor::row_to_names(row_number = 1) |> 
+  janitor::clean_names() |> 
+  slice_head(n = -1) |> 
+  select(-starts_with('na'))
+moved_row_tib
+```
+
+
+
+
+```{r}
+moved_row_tib |> 
+  select(title, album_details)
+```
+
+
+```{r}
+moved_row_tib |> 
+  select(title, album_details) |> 
+  separate_wider_delim(
+    cols = album_details,
+    names = c('release', 'label', 'formats'),
+    delim = '\n'
+  )
+```
+
+
+```{r}
+release_label_formats <- moved_row_tib |> 
+  select(title, album_details) |> 
+  separate_wider_delim(
+    cols = album_details,
+    names = c('release', 'label', 'formats'),
+    delim = '\n'
+  ) |> 
+  mutate(
+    release = mdy(release), # Ignores all text that isn't related to the date
+    label = str_remove(label, 'Label: '),
+    formats = str_remove(formats, 'Formats: ')
+  )
+release_label_formats
+```
+
+
+
+
+```{r}
+moved_row_tib |> 
+  select(title:uk_15, -album_details) 
+```
+
+
+```{r}
+moved_row_tib |> 
+  select(title:uk_15, -album_details) |> 
+  pivot_longer(
+    cols = -1,
+    names_to = 'country',
+    names_pattern = '(.+)_.+',
+    values_to = 'peak_position'
+  )
+```
+
+
+
+```{r}
+peak_positions <- moved_row_tib |> 
+  select(title:uk_15, -album_details) |> 
+  pivot_longer(
+    cols = -1,
+    names_to = 'country',
+    names_pattern = '(.+)_.+',
+    values_to = 'peak_position'
+  ) |> 
+  mutate(peak_position = parse_number(peak_position, na = '—')) 
+  # Make sure that you copy long dash into this
+peak_positions
+```
+
+
+
+```{r}
+moved_row_tib |> 
+  select(title, sales_a)
+```
+
+
+
