@@ -1,0 +1,206 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('52_Nov_01_2023'))
+```
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(rvest)
+wiki_url <- 'https://en.wikipedia.org/wiki/Taylor_Swift_albums_discography'
+
+# Steps from last week (ignore if you want)
+all_tables <- read_html(wiki_url) |> 
+  html_table()
+selected_table <- all_tables[[2]]
+moved_row_tib <- selected_table |> 
+  janitor::row_to_names(row_number = 1) |> 
+  janitor::clean_names() |> 
+  slice_head(n = -1) |> 
+  select(-starts_with('na'))
+
+moved_row_tib |> 
+  select(title, sales_a)
+```
+
+
+
+```{r}
+country_list <- moved_row_tib$sales_a |> 
+  str_extract_all('[A-Z]+:') 
+country_list[1:3] # Display only first three rows here
+```
+
+
+
+```{r}
+moved_row_tib$sales_a |> 
+  str_extract_all('[A-Z]+:') |> 
+  unlist() |> 
+  unique()
+```
+
+
+
+```{r}
+countries_regex <- moved_row_tib$sales_a |> 
+  str_extract_all('[A-Z]+:') |> 
+  unlist() |> 
+  unique() |> 
+  paste0(collapse = '|')
+countries_regex
+```
+
+
+
+```{r}
+country_sales_regex <- glue::glue(
+  '({countries_regex}) [0-9,]+'
+)
+country_sales_regex
+
+moved_row_tib |> 
+  select(title, sales_a) |> 
+  mutate(
+    sales_a = str_extract_all(
+      sales_a,
+      country_sales_regex
+    )
+  )
+```
+
+
+
+
+```{r}
+unnested_sales <- moved_row_tib |> 
+  select(title, sales_a) |> 
+  mutate(
+    sales_a = str_extract_all(
+      sales_a,
+      country_sales_regex
+    )
+  ) |> 
+  unnest(cols = sales_a)
+unnested_sales |> print(n = 4)
+```
+
+
+```{r}
+unnested_sales |> 
+  separate_wider_delim(
+    cols = sales_a,
+    names = c('country', 'sales'),
+    delim = ': '
+  ) |> 
+  print(n = 4)
+```
+
+
+
+```{r}
+album_sales <- unnested_sales |> 
+  separate_wider_delim(
+    cols = sales_a,
+    names = c('country', 'sales'),
+    delim = ': '
+  ) |> 
+  mutate(sales = parse_number(sales))
+album_sales |> print(n = 4)
+```
+
+
+```{r}
+moved_row_tib |> 
+  select(title, certifications)
+```
+
+
+
+```{r}
+certifications_regex <- moved_row_tib$certifications |> 
+  str_extract_all('[A-Z]+:') |> 
+  unlist() |> 
+  unique() |> 
+  paste0(collapse = '|')
+certifications_regex
+```
+
+
+```{r}
+certification_numbers_regex <- glue::glue(
+  '({certifications_regex}) ([0-9]+× )?[a-zA-Z]+'
+  # Make sure to copy correct x symbol from console output 
+  # (the real text doesn't use a regular x)
+)
+certification_numbers_regex
+```
+
+
+
+```{r}
+unnested_and_split_certifications <- moved_row_tib |> 
+  select(title, certifications) |> 
+  mutate(
+    certifications = str_extract_all(
+      certifications,
+      certification_numbers_regex
+    )
+  )  |> 
+  unnest(cols = certifications) |> 
+  separate_wider_delim(
+    cols = certifications,
+    names = c('association', 'certification'),
+    delim = ': '
+  )
+unnested_and_split_certifications |> print(n = 6)
+```
+
+
+
+```{r}
+unnested_and_split_certifications |> 
+  mutate(
+    certification = if_else(
+      str_detect(certification, '[0-9]+'),
+      certification,
+      paste('1x', certification)
+    )
+  )  |> 
+  print(n = 6)
+```
+
+
+
+```{r}
+awards <- unnested_and_split_certifications |> 
+  mutate(
+    certification = if_else(
+      str_detect(certification, '[0-9]+'),
+      certification,
+      paste('1x', certification)
+    ),
+    number = parse_number(certification),
+    certification = str_remove_all(certification, '.+ ')
+  )
+awards |> print(n = 6)
+```
+
+
+
+
+
+
