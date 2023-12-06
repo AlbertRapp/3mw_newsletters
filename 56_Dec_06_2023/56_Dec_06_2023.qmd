@@ -1,0 +1,132 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+
+```{r}
+#| eval: false
+library(shiny)
+
+ui <- fluidPage(
+  # UI stuff here
+)
+
+server <- function(input, output, session) {
+  # Server logic here
+}
+
+shinyApp(ui, server)
+```
+
+
+
+```{python}
+#| eval: false
+from shiny import App, ui, run_app
+
+app_ui = ui.page_fluid(
+    # UI stuff here
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+
+
+```{python}
+#| eval: false
+from shiny import App, ui, run_app
+
+app_ui = ui.page_fluid(
+    ui.input_slider(
+      'numeric_input', 
+      'Select a number:',
+      min = 0,
+      max = 100,
+      value = 5
+    ),
+    ui.input_text(
+      'text_input',
+      label = 'Type in some text'
+    ),
+    ui.output_text('text_output')
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+
+```{python}
+#| eval: false
+from shiny import  App, ui, run_app
+
+app_ui = ui.page_fluid(
+    ui.layout_sidebar(
+      
+      # Sidebar panel
+      ui.sidebar(
+        ui.input_slider(
+          'numeric_input', 
+          'Select a number:',
+          min = 0,
+          max = 100,
+          value = 5
+        ),
+        ui.input_text(
+          'text_input',
+          label = 'Type in some text'
+        )  
+      ),
+      
+      # Main Panel
+      ui.output_text('text_output')
+    )
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+
+
+```{python}
+#| eval: false
+from shiny import render 
+
+def server(input, output, session):
+  @output
+  @render.text
+  def text_output():
+    return input.text_input() + ' ' + str(input.numeric_input())
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+
+
+
+
+
+
+
