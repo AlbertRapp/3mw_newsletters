@@ -1,0 +1,73 @@
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+
+# Page 1
+
+
+## Sidebar {.sidebar}
+
+```{r}
+print('This is in the side')
+```
+
+## Main body
+
+### Row 1 {height="70%"}
+
+
+```{r}
+#| width: 70%
+print('Column 1/2')
+```
+
+
+```{r}
+#| height: 50%
+print('Column 2/2')
+```
+
+### Row 2
+
+#### Column 1
+
+```{r}
+#| content: valuebox
+#| title: "Some cool number"
+list(
+  icon = "newspaper",
+  color = "danger",
+  value = 5
+)
+```
+
+```{python}
+#| content: valuebox
+#| title: "Yet another cool number"
+dict(
+  icon = "chat",
+  color = "primary",
+  value = 42
+)
+```
+
+
+#### Column 2
+
+::: {.card}
+
+<--- That value box was created with R
+
+:::
+
+
+::: {.card}
+
+<--- That value box was created with Python
+
+:::
+
+# Page 2
+
+

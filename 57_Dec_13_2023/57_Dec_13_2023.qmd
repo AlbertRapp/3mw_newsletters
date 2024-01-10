@@ -1,0 +1,356 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+Last week, we built a small Shiny for Python app.
+It didn't look very pretty and didn't have much functionality but at least we made it work.
+This week, let's try to add a stylish button to this app.
+Not only will this teach us about reactive events in Py-Shiny but also how to add custom style.
+
+---
+
+Course and video announcement
+
+---
+
+# Add a button
+
+The first thing we want to do is to add a button to our app.
+In R, the code for a button would be
+
+```{r}
+#| eval: false
+actionButton(
+  inputId = 'my_cool_btn',
+  label = 'Click me!'
+)
+```
+
+
+This would give us a boring button like this.
+
+```{r}
+#| eval: false
+library(shiny)
+
+ui <- fluidPage(
+  actionButton(
+    inputId = 'my_cool_btn',
+    label = 'Click me!'
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+![](r_boring_btn.png)
+
+In Py-Shiny, we can generate the same boring button like this:
+
+```{python}
+#| eval: false
+from shiny import  App, ui, run_app
+
+app_ui = ui.page_fluid(
+    ui.input_action_button(
+      id = 'my_cool_btn',
+      label = 'Click me!'
+    )
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+Well, it's not exactly the same button but it's still boring.
+Have a look:
+
+![](py_basic_btn.png)
+
+The notable difference in the code is that the `id` argument name is actually just `id` and not `inputId`.
+More importantly, just like any other input element, the function that generates the button starts with `input_`.
+(I'm really a fan of this naming convention. Much easier to look up the specific name 🥳)
+
+
+
+
+## Style our button in R
+
+Next, let us add a little bit more flavor to our button.
+In R, we can achieve that by adding CSS code to the style argument of the button.
+
+```{r}
+#| eval: false
+actionButton(
+    inputId = 'my_cool_btn',
+    label = 'Click me!',
+    style = 'border-radius: 10px; height: 50px; width: 100px; font-weight: bold;'
+  )
+```
+
+This will give us a button that looks differnt but not really fancy either.
+Here's how it looks.
+
+![](r_btn_3_keywords.png)
+
+```{r}
+#| eval: false
+library(shiny)
+
+ui <- fluidPage(
+  actionButton(
+    inputId = 'my_cool_btn',
+    label = 'Click me!',
+    style = 'border-radius: 10px; width: 200px; font-weight: bolder;'
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+We can make this much more fancy by adding way more CSS.
+But at this point, it becomes just too cumbersome to include all of the key-value pairs (like `border-radius: 10px;`) in one long text.
+That's messy af.
+Thankfully, there's the `{htmltoools}` package in R.
+It makes the CSS code-formatting much easier.
+
+```{r}
+#| eval: false
+
+actionButton(
+    inputId = 'my_cool_btn',
+    label = 'Click me!',
+    style = htmltools::css(
+      border_radius = '10px',
+      width = '200px',
+      font_weight = 'bolder'
+    )
+  )
+```
+
+Ahh much nicer code.
+Now, we can add a couple of CSS keywords to make our button fancy.
+Don't worry if you don't know them all.
+This newsletter isn't really about CSS but I do like to show what's possible with it.
+(You know, because people always say all Shiny app look alike (which is true but might be different if more people would want to use CSS))
+
+```{r}
+#| eval: false
+actionButton(
+  inputId = 'my_cool_btn',
+  label = 'Click me!',
+  style = htmltools::css(
+    border_radius = '10px',
+    width = '200px',
+    font_weight = 'bolder',
+    margin = '10px',
+    padding = '15px',
+    font_size = '32px',
+    color = "#333333",
+    background =  'linear-gradient(43deg, #C6FFDD 0%, #FBD786 46%, #f7797d 100%)',
+    border = '3px solid #333333'
+  )
+)
+```
+
+In the end, this CSS code would give us a fancy button that is admittedly a bit extreme:
+
+![](r_btn.png)
+
+
+```{r}
+#| eval: false
+btn <- actionButton(
+  inputId = 'my_cool_btn',
+  label = 'Click me!',
+  style = htmltools::css(
+    border_radius = '10px',
+    width = '200px',
+    font_weight = 'bolder',
+    margin = '10px',
+    padding = '15px',
+    font_size = '32px',
+    color = "#333333",
+    background =  'linear-gradient(43deg, #C6FFDD 0%, #FBD786 46%, #f7797d 100%)',
+    border = '3px solid #333333'
+  )
+)
+
+library(shiny)
+
+ui <- fluidPage(
+  btn
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+---
+
+## Style the button in Python
+
+So, we used the `{htmltools}` package to make our life a lot easier in R.
+The questions quickly becomes: 
+*Can we do that in Py-Shiny too?*
+
+Thankfully, the answer is yes.
+It turns out that the kind people of Posit also brought `{htmltools}` to Python.
+The code is nearly identical.
+
+```{python}
+#| eval: false
+from shiny import  App, ui, run_app
+import htmltools
+
+# Saving this as extra variable to keep UI code short
+my_python_button = ui.input_action_button(
+  id = 'my_cool_btn',
+  label = 'Click me!',
+  style = htmltools.css(
+    border_radius = '10px',
+    width = '200px',
+    font_weight = 'bolder',
+    margin = '10px',
+    padding = '15px',
+    font_size = '32px',
+    color = "#333333",
+    background =  'linear-gradient(43deg, #C6FFDD 0%, #FBD786 46%, #f7797d 100%)',
+    border = '3px solid #333333'
+  )
+)
+
+app_ui = ui.page_fluid(
+    my_python_button
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+Neat!
+We didn't have to learn anything new and got the same output.
+Check out how the button looks.
+
+![](python_btn.png)
+
+---
+
+## Sticking this into our sidebar
+
+Alright cool.
+We have a fancy button in Python now.
+We can stick this into our app.
+The code for that is pretty much the same code from last week plus the new button variable.
+
+```{python}
+#| eval: false
+from shiny import  App, ui, run_app, render 
+app_ui = ui.page_fluid(
+    ui.layout_sidebar(
+      
+      # Sidebar panel
+      ui.sidebar(
+        ui.input_slider(
+          'numeric_input', 
+          'Select a number:',
+          min = 0,
+          max = 100,
+          value = 5
+        ),
+        ui.input_text(
+          'text_input',
+          label = 'Type in some text'
+        ),
+        my_python_button # variable from before
+      ),
+      
+      # Main Panel
+      ui.output_text('text_output')
+    )
+)
+
+def server(input, output, session):
+  @output
+  @render.text
+  def text_output():
+    return input.text_input() + ' ' + str(input.numeric_input())
+
+app = App(app_ui, server)
+run_app(app)
+```
+
+
+Look how beautiful our button is in our new app.
+If that's not [majestic as pug](https://www.reddit.com/r/funny/comments/1vvey5/pughorse/), then I don't know what is 🤣
+
+![](button_added_to_app.png)
+
+Okay, maybe the button is a bit too much right now.
+Whatever.
+Let's just make make sure that the text output in the main panel appears only after clicking the button.
+
+## Reactive events in Py-Shiny
+
+Just like in R, there are there are multiple reactive things you can do in Py-Shiny. Interestingly, in Py-Shiny all of the things related to reactivity are accessible via `reactive.` (naming convtions strike again!)
+If you look at the docs of Py-Shiny you will find:
+
+![](reactive_docs.png)
+
+For our current use case, what we need from that list is `reactive.event()`.
+This one is really easy. 
+It's just another decorator (the scientific term is `@`-thingy) that we need to include for our render call.
+
+```{python}
+#| eval: false
+from shiny import reactive
+def server(input, output, session):
+  @output
+  @render.text
+  @reactive.event(input.my_cool_btn) # Make reactive wrt. button with id "my_cool_btn"
+  def text_output():
+    return input.text_input() + ' ' + str(input.numeric_input())
+```
+
+After we make these changes to our `server` function in the Py-Shiny app, everything works as expected.
+Hooray 🤸
+
+![](final_app.gif)
+
+```{python}
+#| eval: false
+app = App(app_ui, server)
+run_app(app)
+```
+
+
+
+
+

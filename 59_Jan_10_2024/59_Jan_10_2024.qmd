@@ -1,0 +1,217 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+
+
+```{verbatim}
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+```
+
+
+
+````{verbatim}
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+
+# Page 1
+
+
+## Row 1
+
+```{r}
+print('Column 1/2')
+```
+
+```{r}
+print('Column 2/2')
+```
+
+## Row 2
+
+```{r}
+print('Column 1/1')
+```
+
+
+# Page 2
+````
+
+
+````{verbatim}
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+
+# Page 1
+
+
+## Sidebar {.sidebar}
+
+```{r}
+print('This is in the side')
+```
+
+## Row 1
+
+```{r}
+print('Column 1/2')
+```
+
+```{r}
+print('Column 2/2')
+```
+
+## Row 2
+
+```{r}
+print('Column 1/1')
+```
+
+
+# Page 2
+````
+
+
+
+
+````{verbatim}
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+
+# Page 1
+
+
+## Sidebar {.sidebar}
+
+```{r}
+print('This is in the side')
+```
+
+## Main body
+
+### Row 1
+
+```{r}
+print('Column 1/2')
+```
+
+```{r}
+print('Column 2/2')
+```
+
+### Row 2
+
+```{r}
+print('Column 1/1')
+```
+
+
+# Page 2
+````
+
+
+
+````{verbatim}
+---
+title: My first Quarto Dashboard
+format: dashboard
+---
+
+# Page 1
+
+
+## Sidebar {.sidebar}
+
+```{r}
+print('This is in the side')
+```
+
+## Main body
+
+### Row 1 {height="70%"}
+
+```{r}
+#| width: 70%
+print('Column 1/2')
+```
+
+
+```{r}
+#| height: 50%
+print('Column 2/2')
+```
+
+### Row 2
+
+```{r}
+print('Column 1/1')
+```
+
+
+# Page 2
+````
+
+
+```{r}
+#| output: false
+#| echo: fenced
+print('This produces some output')
+```
+
+
+```{verbatim}
+//| output: false
+console.log('This produces some output')
+```
+
+
+
+
+```{r}
+#| echo: fenced
+#| content: valuebox
+#| title: "Some cool number"
+list(
+  icon = "newspaper",
+  color = "danger",
+  value = 5
+)
+```
+
+```{python}
+#| echo: fenced
+#| content: valuebox
+#| title: "Yet another cool number"
+dict(
+  icon = "chat",
+  color = "primary",
+  value = 42
+)
+```
+
+
+```{verbatim}
+::: {.card}
+
+This is some text placed in a card.
+
+:::
+```
