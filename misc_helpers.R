@@ -31,14 +31,25 @@ if (!file.exists(new_qmd_file_path)) {
   file.create(new_qmd_file_path)
   file_conn <- file(new_qmd_file_path, open = 'a+')
   writeLines(
-    c(
-      "", "", "```{r}", 
-      glue::glue("setwd(here::here('{new_dir_name}'))"), 
-      "library(tidyverse)",
-      "```"
-    ), 
+    readLines('template_chunk.md') |> 
+      stringr::str_replace('NEW\\_DATE\\_HERE', new_dir_name), 
     file_conn
   )
   close(file_conn)
 }
 rstudioapi::navigateToFile(new_qmd_file_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

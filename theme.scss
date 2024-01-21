@@ -1,0 +1,80 @@
+/*-- scss:defaults --*/
+/*--  @font-face {
+    font-family: 'FiraCode';
+    src: url('../../../../../FiraCode-Regular.woff2') format('woff2'),
+         url('../../../../../FiraCode-Regular.woff') format('woff');
+}
+
+$font-family-monospace: 'FiraCode'; --*/
+
+$theme-sand: #F1EAE5;
+$theme-white: #FFFFFF;
+
+$body-bg: $theme-sand;
+
+/*-- scss:rules --*/
+
+pre code {
+  background-color: #2e3440;
+  color: white;
+  font-weight: 600;
+  font-size: 14pt;
+  padding: 20px;
+  box-shadow: 0 20px 47px rgb(0 0 0 / 70%);
+  width: fit-content;
+  min-width: 600px;
+}
+
+div.sourceCode {
+  background: rgb(2,0,36);
+  background: linear-gradient(45deg, rgba(2,0,36,1) 0%, #adc4db 0%, rgba(255,255,255,1) 100%);
+  border: none;
+  border-radius: 5px;
+  margin: 30px;
+  width: fit-content;
+}
+
+
+
+
+div.sourceCode pre code {
+  margin: 50px;
+}
+
+div.sourceCode pre code > span, code span.bu {
+  color: #ffffff;
+}
+
+code span.er {
+  color: #ebcb8b;
+}
+
+code span.st {
+  color:  #ebcb8b;
+}
+
+code span.do, code span.co  {
+  color:  #9e9e9e;
+}
+
+code span.fu, code span.cf, code span.im, code span.kw {
+  color:  #89c0d1;
+}
+
+code span.at, code span.in {
+  color:  #b7dae5;
+}
+
+code span.fl, code span.dv {
+  color:  #b48ead;
+}
+
+
+code span.sc,  code span.ot{
+  color:  #ebcb8b;
+}
+
+
+
+
+
