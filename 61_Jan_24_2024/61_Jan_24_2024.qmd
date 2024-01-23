@@ -1,0 +1,145 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('61_Jan_24_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+#| eval: false
+penguin_weights |> 
+  mutate(Distribution = Species) |>
+  reactable(
+    columns = list(
+      Species = colDef(
+        name = "Species",
+        # Rest of Species colDef()
+      ),
+      # Rest of other columns
+    )
+  )
+```
+
+```{r}
+#| eval: false
+library(htmltools)
+div(
+  div('Species', style = 'font-weight:600'),
+  purrr::map(
+    unique(palmerpenguins::penguins$species), 
+    \(x) tags$input(
+      type = 'checkbox',   # checkbox look by setting the type
+      name = 'checkboxes', # all checkboxes have the same name
+      checked = 'checked', # checked by default
+      value = x,           # value is the species name
+      x                    # label is the species name
+    )
+  )
+)
+```
+
+
+
+
+```{r}
+#| eval: false
+penguin_weights |> 
+  mutate(Distribution = Species) |>
+  reactable(
+    columns = list(
+      Species = colDef(
+        name = "Species",
+        # Rest of Species colDef()
+      ),
+      # Rest of other columns
+    ),
+    elementId = "tbl"
+  )
+```
+
+```{r}
+#| eval: false
+penguin_weights |> 
+  mutate(Distribution = Species) |>
+  reactable(
+    columns = list(
+      Species = colDef(
+        name = "Species",
+        filterMethod = reactable::JS("
+          function(rows, columnId, filterValue) {
+            return filterValue.length === 0 ? rows : rows.filter(
+              (row) => {
+                return filterValue.includes(row.values[columnId])
+              }
+            )
+          }
+          "
+        )
+        # Rest of Species colDef()
+      ),
+      # Rest of other columns
+    ),
+    elementId = "tbl"
+  )
+```
+
+
+
+
+```{r}
+#| eval: false
+div(
+  div('Species', style = 'font-weight:600'),
+  purrr::map(
+    unique(palmerpenguins::penguins$species), 
+    \(x) tags$input(
+      type = 'checkbox',
+      name = 'checkboxes',
+      checked = 'checked',
+      value = x,
+      x
+    )
+  ),
+  onchange = reactable::JS(
+    "
+    checkboxes = document.querySelectorAll('input[name=\"checkboxes\"]');
+    selected_species = Array.from(checkboxes)
+          .filter(function(checkbox) {
+            return checkbox.checked;
+          })
+          .map(function(checkbox) {
+            return checkbox.value;
+          });
+    Reactable.setFilter(
+      'tbl',
+      'Species',
+      selected_species
+    )
+    "
+  )
+)
+```
+
+
+
