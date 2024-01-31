@@ -1,0 +1,106 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('62_Jan_31_2024'))
+library(tidyverse)
+```
+
+
+```{r}
+library(httr2)
+NWS_base_url <- 'https://api.weather.gov'
+request(NWS_base_url) |> 
+    req_url_path_append(
+      'points',
+      '38.8894,-77.0352'
+    ) 
+```
+
+
+
+```{r}
+NWS_response <- request(NWS_base_url) |> 
+  req_url_path_append(
+    'points',
+    '38.8894,-77.0352'
+  ) |> 
+  req_perform()
+NWS_response
+```
+
+
+```{r}
+NWS_response |> 
+  resp_body_json()
+```
+
+
+```{r}
+library(tidyverse)
+NWS_response |> 
+  resp_body_json() |> 
+  glimpse()
+```
+
+```{r}
+library(tidyverse)
+forecast_url <- NWS_response |> 
+  resp_body_json() |> 
+  pluck('properties', 'forecastHourly')
+forecast_url
+```
+
+
+```{r}
+forecast_response <- request(forecast_url) |> 
+  req_perform()
+forecast_response |> 
+  resp_body_json() |> 
+  glimpse()
+```
+
+
+```{r}
+forecast_response |> 
+  resp_body_json() |> 
+  pluck('properties', 'periods') |> 
+  glimpse()
+```
+
+```{r}
+extracted_data <- forecast_response |> 
+  resp_body_json() |> 
+  pluck('properties', 'periods') |> 
+  map_dfr( # iterates over each list and binds rows to a tibble
+    \(x) {
+      tibble(
+        time = x |> pluck('startTime'),
+        temp_F = x |> pluck('temperature'),
+        rain_prob = x |> pluck('probabilityOfPrecipitation', 'value'),
+        forecast = x |> pluck('shortForecast')
+      )
+    }
+  )
+extracted_data
+```
+
+
+```{r}
+extracted_data |> 
+  mutate(
+    time = time |> ymd_hms()
+  )
+```
+
+
