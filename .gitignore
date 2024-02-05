@@ -21,3 +21,4 @@
 *.css
 *.js
 *.woff
+.env
