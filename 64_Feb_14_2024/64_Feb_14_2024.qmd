@@ -1,0 +1,115 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+
+```{r}
+library(httr2)
+dotenv::load_dot_env('../.env')
+YT_oauth_client <- oauth_client(
+  id = Sys.getenv('YT_OAuth_id_tutorial'),
+  token_url = 'https://oauth2.googleapis.com/token',
+  secret = Sys.getenv('YT_OAuth_secret_tutorial')
+)
+```
+
+
+```{r}
+video_id <- 'hXP5fUfBGQQ'
+```
+
+
+```{r}
+YT_data_URL <- 'https://www.googleapis.com/youtube/v3/videos'
+```
+
+
+```{r}
+request(YT_data_URL) |> 
+  req_url_query(
+    part = 'statistics',
+    id = video_id
+  )
+```
+
+
+
+```{r}
+#| eval: false
+YT_req <- request(YT_data_URL) |> 
+  req_url_query(
+    part = 'statistics',
+    id = video_id
+  ) |> 
+  req_oauth_auth_code(
+    client    = YT_oauth_client,
+    scope     = 'https://www.googleapis.com/auth/youtube.readonly',
+    auth_url  = 'https://accounts.google.com/o/oauth2/auth',
+    port      = 7094
+  ) |> 
+  req_perform()
+```
+
+
+
+```{r}
+#| eval: false
+YT_req |> 
+  resp_body_json() |> 
+  purrr::pluck('items', 1, 'statistics')
+# $viewCount
+# [1] "1439580"
+# 
+# $likeCount
+# [1] "39190"
+# 
+# $favoriteCount
+# [1] "0"
+# 
+# $commentCount
+# [1] "667"
+```
+
+
+
+```{r}
+#| eval: false
+YT_req <- request(YT_data_URL) |> 
+  req_url_query(
+    part = 'statistics',
+    id = video_id
+  ) |> 
+  req_oauth_auth_code(
+    client    = YT_oauth_client,
+    scope     = 'https://www.googleapis.com/auth/youtube.readonly',
+    auth_url  = 'https://accounts.google.com/o/oauth2/auth',
+    port      = 7094,
+    cache_key = 'YT_tutorial'
+  ) |> 
+  req_perform()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

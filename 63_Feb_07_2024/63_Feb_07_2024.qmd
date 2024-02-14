@@ -72,6 +72,20 @@ response |>
 
 
 ```{r}
+library(tidyverse)
+library(httr2)
+dotenv::load_dot_env(file = '../.env') # Load .env file into environment
+geocode_base_url <- 'https://maps.googleapis.com/maps/api/geocode/json'
+
+# Make API Request
+response <- request(geocode_base_url) |> 
+  req_url_query(
+    address = '1900 E Kenwood Blvd, Milwaukee, WI 53211, USA',
+    key = Sys.getenv('GEOCODE_API_KEY') # Access API key from environment
+  ) |>
+  req_perform()
+
+# Extract coordinates from response
 response |> 
   resp_body_json() |> 
   pluck('results', 1, 'geometry', 'location')  |> 
