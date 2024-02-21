@@ -1,0 +1,148 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+
+```{r}
+library(htmltools)
+div(
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) 
+```
+
+
+```{.r}
+<div>
+  <div>
+    11:38
+    icons-right
+  </div>
+  <div>
+    <div>
+      Milwaukee, WI
+      Location Icon
+    </div>
+  </div>
+  <div>
+    22°
+    Rain
+    22°/14°
+  </div>
+  <div>forecast-icon</div>
+  <div>
+    <div>Row 1</div>
+    <div>Row 2</div>
+    <div>Row 3</div>
+  </div>
+</div>
+```
+
+
+```{r}
+div(
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
+```{r}
+div(
+  style = 'width:375px; height:650px; background: #333333',
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
