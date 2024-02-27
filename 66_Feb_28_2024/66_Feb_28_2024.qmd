@@ -1,0 +1,244 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+library(htmltools)
+div(
+  style = 'width:375px; height:650px; background: #333333',
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
+```{r}
+css(
+  width = '375px',
+  height = '650px',
+  background = '#333333'
+)
+```
+
+
+```{r}
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px'
+  ),
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
+
+```{r}
+css(
+  border_radius = '20px'
+)
+```
+
+```{r}
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+  ),
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
+```{r}
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+  ),
+  div(
+      '11:38',
+      'icons-right'
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     'Location Icon'
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  div(
+    'forecast-icon'
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
+
+
+```{r}
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+  ),
+  div(
+      '11:38',
+      # Replace 'icons-right' with icons
+      shiny::icon('signal'),
+      shiny::icon('wifi'),
+      shiny::icon('battery-three-quarters')
+  ),
+  div(
+   div(
+     'Milwaukee, WI',
+     shiny::icon('location-dot')
+   )
+  ),
+  div(
+    '22°',
+    'Rain',
+    '22°/14°'
+  ),
+  # Replace `forecast-icon` div with icon
+  shiny::icon('cloud-rain'),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    )
+  )
+) |> browsable()
+```
+
