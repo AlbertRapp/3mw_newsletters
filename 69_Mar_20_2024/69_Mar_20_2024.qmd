@@ -1,0 +1,693 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('69_Mar_20_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600
+  ),
+  div(
+      '11:38',
+      shiny::icon('signal', style = css(margin_left = '5px')),  
+      shiny::icon('wifi', style = css(margin_left = '5px')),    
+      shiny::icon('battery-three-quarters', style = css(margin_left = '5px')),  
+      style = css(
+        margin_bottom = '30px'  
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'     
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',   
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600
+  ),
+  div(
+      '11:38',
+      div( ### <-- changes here
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px'  
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+ 
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600
+  ),
+  div(
+      '11:38',
+      div( 
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px',
+        display = 'flex'        ### <-- changes here
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600
+  ),
+  div(
+      '11:38',
+      div( 
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px',
+        display = 'flex',
+        justify_content = 'space-between' ### <-- changes here
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600,
+    display = 'flex' ### <-- changes here
+  ),
+  div(
+      '11:38',
+      div( 
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px',
+        display = 'flex',
+        justify_content = 'space-between' 
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600,
+    display = 'flex',
+    flex_direction = 'column'  ### <-- changes here
+  ),
+  div(
+      '11:38',
+      div( 
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px',
+        display = 'flex',
+        justify_content = 'space-between' 
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px'   
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
+
+```{r}
+library(htmltools)
+div(
+  style = css(
+    width = '375px',
+    height = '650px',
+    background = 'linear-gradient(45deg, #46afff, #47c8ff)',
+    border = '3px solid #333333',
+    border_radius = '20px',
+    font_family = 'Source Sans Pro',
+    color = 'white',
+    padding = '15px 25px 15px 25px',
+    font_size = '20px',
+    font_weight = 600,
+    display = 'flex',
+    flex_direction = 'column'
+  ),
+  div(
+      '11:38',
+      div( 
+        shiny::icon('signal', style = css(margin_left = '5px')),  
+        shiny::icon('wifi', style = css(margin_left = '5px')),    
+        shiny::icon(
+          'battery-three-quarters', style = css(margin_left = '5px')
+        )
+      ),  
+      style = css(
+        margin_bottom = '30px',
+        display = 'flex',
+        justify_content = 'space-between' 
+      )
+  ),
+  div(
+    div(
+      'Milwaukee, WI',
+      shiny::icon(
+        'location-dot',
+        style = css(
+          font_size = '32px',
+          margin_left = '10px' 
+        )
+      ),
+      style = htmltools::css(  
+        font_size = '42px'    
+      )                        
+   )
+  ),
+  div(
+    span(
+      '22°',
+      style = htmltools::css(
+        font_size = '100px',  
+      )
+    ),
+    span(
+      'Rain',
+      style = htmltools::css(
+        font_size = '25px',    
+        margin_left = '10px',  
+        font_weight = 400      
+      )
+    ),
+    span(
+      '22°/14°',
+      style = htmltools::css(
+        font_size = '25px',   
+        margin_left = '10px', 
+        font_weight = 400     
+      )
+    ),
+  ),
+  shiny::icon(
+    'cloud-rain',
+    style = css(
+      font_size = '150px',
+      margin_top = '35px',
+      margin_left = 'auto',   ### <-- changes here
+      margin_right = 'auto'   ### <-- changes here
+    )
+  ),
+  div(
+    div(
+      'Row 1'
+    ),
+    div(
+      'Row 2'
+    ),
+    div(
+      'Row 3'
+    ),
+    style = css(
+      margin_top = '50px'
+    )
+  )
+) |> browsable()
+
+```
+
