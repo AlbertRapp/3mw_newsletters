@@ -1,0 +1,64 @@
+---
+execute:
+  echo: false
+params:
+  selected_city_value: 'Milwaukee_WI'
+---
+
+```{r}
+#| warning: false
+#| message: false
+library(tidyverse)
+library(htmltools)
+
+city_names <- c(
+  "Chicago, IL", 
+  "Milwaukee, WI", 
+  "New York City, NY", 
+  "Los Angeles, CA", 
+  "San Francisco, CA"
+) |> sort()
+
+create_dropdown_entry <- function(cityname, selected_city_value = FALSE) {
+  value_tag <- cityname |>
+      str_replace_all(" ", "_") |>
+      str_replace_all(",", "")
+  selected <- (value_tag == selected_city_value)
+  
+  tag <- tags$option(
+    style = css(background_color = "#46c1ff"),
+    value = value_tag,
+    cityname
+  )
+  
+  if (selected) {
+    tag <- tag |> tagAppendAttributes(selected = 'adfgfdaf')
+  }
+  tag
+}
+```
+
+
+```{r}
+tags$select(
+  style = css(
+    background = "transparent",
+    border = "none",
+    font_size = "42px",              
+    font_weight = 600,               
+    font_family = "Source Sans Pro", 
+    color = "white"                  
+  ),
+  id = "dropdown_location",
+  onchange = 'window.location.href = document.getElementById("dropdown_location").value + ".html"',
+  map(
+    city_names,
+    create_dropdown_entry,
+    selected_city_value = params$selected_city_value
+  )
+) |>  
+  div(style = 'background: #46c1ff; display: inline-block;') |> 
+  browsable()
+```
+
+We selected `r params$selected_city_value`

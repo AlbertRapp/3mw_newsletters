@@ -1,0 +1,310 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('72_Apr_10_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+# Using Parameterized Report Generation with Quarto for Dynamic Web Interfaces
+
+In today's newsletter, I'm going to show you how you can use parameterized report generation to create websites that feel dynamic even though they are completely static, without relying on a server backend.
+But before we do that, time for my usual announcement:
+
+---
+
+3 Ways to add images to ggplots
+
+---
+
+As always, code on GH
+
+---
+
+
+
+# Recap
+
+Last time, we were working with our weather app user interface and plugged in a dropdown menu where we can select multiple cities.
+We implemented a line of JavaScript code that alerts us to the selected city value, where whitespaces and special characters are replaced by underscores.
+So, what we currently have is
+
+- a function that can create a dropdown entry
+
+```{r}
+create_dropdown_entry <- function(cityname) {
+  value_tag <- cityname |>
+      str_replace_all(" ", "_") |>
+      str_replace_all(",", "")
+  
+  tags$option(
+    style = css(background_color = "#46c1ff"),
+    value = value_tag,
+    cityname
+  )
+}
+```
+
+- a list of city names, and
+- a dropdown menu generated from that list.
+
+
+```{r}
+library(htmltools)
+city_names <- c(
+  "Chicago, IL", 
+  "Milwaukee, WI", 
+  "New York City, NY", 
+  "Los Angeles, CA", 
+  "San Francisco, CA"
+) |> sort()
+
+tags$select(
+  style = css(
+    background = "transparent",
+    border = "none",
+    font_size = "42px",              
+    font_weight = 600,               
+    font_family = "Source Sans Pro", 
+    color = "white"                  
+  ),
+  id = "dropdown_location",
+  onchange = 'alert(document.getElementById("dropdown_location").value)',
+  map(
+    city_names,
+    create_dropdown_entry
+  )
+) |>  
+  div(style = 'background: #46c1ff; display: inline-block') |> 
+  browsable()
+```
+
+OUTPUT
+
+---
+
+# Set the selected
+
+Currently, our dropdown menu shows the first entry from the list by default.
+To make sure we can select a specific city, we can add the `selected` attribute to the `option` tag that we want to select.
+As soon as the `selected` attribute is inside an `option` tag, that particular option is the one displayed and selected in the dropdown menu.
+
+
+We can use that to our advantage by modifying the `create_dropdown_entry()` function.
+We'll just use another argument `selected_city_value` and check if the value we currently put into the `value` attribute corresponds to that.
+
+
+```{r}
+create_dropdown_entry <- function(cityname, selected_city_value = FALSE) {
+  value_tag <- cityname |>
+      str_replace_all(" ", "_") |>
+      str_replace_all(",", "")
+  selected <- (value_tag == selected_city_value)
+  
+  tag <- tags$option(
+    style = css(background_color = "#46c1ff"),
+    value = value_tag,
+    cityname
+  )
+  if (selected) {
+    tag <- tag |> tagAppendAttributes(selected = 'adfgfdaf')
+  }
+  tag
+}
+```
+
+With this, we can easily set an arbitrary city as selected city.
+
+```{r}
+tags$select(
+  style = css(
+    background = "transparent",
+    border = "none",
+    font_size = "42px",              
+    font_weight = 600,               
+    font_family = "Source Sans Pro", 
+    color = "white"                  
+  ),
+  id = "dropdown_location",
+  onchange = 'alert(document.getElementById("dropdown_location").value)',
+  map(
+    city_names,
+    create_dropdown_entry,
+    selected_city_value = 'Los_Angeles_CA' # Set the selected entry here
+  )
+) |>  
+  div(style = 'background: #46c1ff; display: inline-block') |> 
+  browsable()
+```
+
+OUTPUT
+
+
+# Parameterized Report
+
+The next step is to create a template using parameterized reports.
+A parameterized report is a Quarto file where you can set a parameter in the YAML header that will be used throughout the rendering of the document.
+It's a great way to create a bunch of similar documents.
+
+We can use this to create not just one website that displays the user interface with the selected city, but render multiple documents, one for each city we want to look at.
+All of this happens using the same template Quarto file, and we just tweak the parameter in each render process.
+But of course, we need to create such a template file first. 
+
+So let's just create a new Quarto file `template.qmd` and throw in all of our previous code chunks.
+And in the YAML header, we can set the `params` option for the `selected_city_value` attribute to a city value like `Milwaukee_WI`.
+
+```{verbatim}
+---
+execute:
+  echo: false
+params:
+  selected_city_value: 'Milwaukee_WI'
+---
+```
+
+This way, whenever we render the document, we'll get a dropdown menu with Milwaukee, Wisconsin displayed.
+
+
+
+To prove that not only the dropdown menu changes, we can also put some text below that into the Quarto file.
+
+
+```{.r}
+tags$select(
+  style = css(
+    background = "transparent",
+    border = "none",
+    font_size = "42px",              
+    font_weight = 600,               
+    font_family = "Source Sans Pro", 
+    color = "white"                  
+  ),
+  id = "dropdown_location",
+  onchange = 'alert(document.getElementById("dropdown_location").value)',
+  map(
+    city_names,
+    create_dropdown_entry,
+    ### Use params her here
+    selected_city_value = params$selected_city_value
+  )
+) |>  
+  div(style = 'background: #46c1ff; display: inline-block;') |> 
+  browsable()
+```
+
+INSERT OUTPUT HERE
+
+---
+
+
+# Navigating Between Reports
+
+Now, we need to implement a logic that can switch between the different report outputs we render.
+This is where our one line of JavaScript code comes in.
+We replace the `alert` function with something that navigates the web browser to a different file.
+The JS code for that is simply setting the variable `window.location.href` variable to the file name of the rendered report.
+
+```{.r}
+tags$select(
+  style = css(
+    background = "transparent",
+    border = "none",
+    font_size = "42px",              
+    font_weight = 600,               
+    font_family = "Source Sans Pro", 
+    color = "white"                  
+  ),
+  id = "dropdown_location",
+  ### Change here
+  onchange = 'window.location.href = document.getElementById("dropdown_location").value + ".html";',
+  ###
+  map(
+    city_names,
+    create_dropdown_entry,
+    selected_city_value = params$selected_city_value
+  )
+) |>  
+  div(style = 'background: #46c1ff; display: inline-block;') |> 
+  browsable()
+```
+
+
+As long as we name our rendered HTML reports using the city values, we can use what we already get in our popup alert to instruct the web browser to navigate to the file that has the report for the selected city.
+For the user, it looks like the information updated, but really, only the URL changed.
+
+
+NEW OUTPUT WITH CHANGED URL
+
+---
+
+# Rendering the Files
+
+But all of this requires that all of the cities that we can select have a rendered report.
+And that's where the `{quarto}` R package comes in.
+With this package, you can render Quarto documents with specific input parameters from within an R script.
+
+```{.r}
+setwd(here::here('72_Apr_10_2024'))
+library(tidyverse)
+city_values <- c(
+  "Chicago, IL", 
+  "Milwaukee, WI", 
+  "New York City, NY", 
+  "Los Angeles, CA", 
+  "San Francisco, CA"
+) |>
+  str_replace_all(" ", "_") |>
+  str_replace_all(",", "")
+
+walk(
+  city_values,
+  \(x) quarto::quarto_render(
+    input = 'template.qmd',
+    output_file = glue::glue('{x}.html'),
+    execute_params = list(
+      selected_city_value = x
+    )
+  )
+)
+```
+
+
+
+Once you run the script, you will see all of your output files.
+Now you can open one of the city HTML reports, and when you select something else from the dropdown menu, the URL and displayed information will change.
+
+---
+
+# Conclusion
+
+This is a neat, low-tech solution for when you don't need real-time information but just want to display a bunch of stuff at a set interval.
+You could set up some automation to re-render this as needed.
+And the best part is that you don't have to set up a server infrastructure to handle things like Shiny.
+All you need is a place to store your HTML files, and the rest just works.
+
+As always, I hope you enjoyed this newsletter.
+If you have any questions, feel free to reach out to me by replying to this email or contacting me on LinkedIn.
+
+
+
+
+
+
