@@ -1,0 +1,124 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('76_May_08_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+library(shiny)
+ui <- bslib::page_fluid(
+  sliderInput('slider', 'Slider', min = 1, max = 100, value = 50),
+  actionButton('button', 'Button'),
+  textOutput('text')
+)
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  output$text <- renderText({
+    print(input$button)
+    input$slider
+  })
+}
+
+```
+
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  output$text <- renderText({
+    req(input$button >= 1)
+    print(input$button)
+    input$slider
+  })
+}
+
+```
+
+
+```{r}
+server <- function(input, output, session) {
+  output$text <- renderText({
+    req(input$button >= 1)
+    print(input$button)
+    isolate(input$slider)
+  })
+}
+```
+
+
+```{r}
+server <- function(input, output, session) {
+  output$text <- renderText({
+    req(input$button >= 1)
+    print(input$button)
+    input$slider
+  }) |> bindEvent(input$button)
+}
+
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  observeEvent(
+    input$button, # Event
+    {             # Code to execute on event
+      
+      output$text <- renderText({
+        req(input$button >= 1)
+        print(input$button)
+        input$slider
+      })
+      
+    }
+  )
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
