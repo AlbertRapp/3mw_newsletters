@@ -1,0 +1,136 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('75_May_01_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+#| eval: false
+library(shiny)
+
+ui <- fluidPage(
+  
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+```{r}
+library(shiny)
+
+ui <- bslib::page_fluid(
+  
+)
+```
+
+
+
+```{r}
+ui <- bslib::page_fluid(
+  # A slider
+  sliderInput(
+    'my_slider',            # Input ID
+    'Select your number',   # Input label
+                            # Input-specifc stuff
+    min = 0,
+    max = 1,
+    value = 0.5,
+    step = 0.1
+  ),
+  
+  # A dropdown menu
+  selectInput(
+    'my_dropdown_menu',    # Input ID
+    'Pick your color',     # Input label
+                           # Input-specifc stuff
+    choices = c('red', 'green', 'blue')
+  )
+)
+```
+
+
+
+```{r}
+ui <- bslib::page_fluid(
+  sliderInput(
+    'my_slider',
+    'Select your number',
+    min = 0,
+    max = 1,
+    value = 0.5,
+    step = 0.1
+  ),
+  
+  selectInput(
+    'my_dropdown_menu',   
+    'Pick your color',     
+    choices = c('red', 'green', 'blue')
+  ),
+  
+  ## Add a text output
+  textOutput('my_generated_text')
+)
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  
+}
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  output$my_generated_text <- renderText({
+  
+  })
+}
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  output$my_generated_text <- renderText({
+    paste(
+      input$my_dropdown_menu, 
+      input$my_slider
+    )
+  })
+}
+```
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
