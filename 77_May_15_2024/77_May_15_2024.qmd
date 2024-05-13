@@ -1,0 +1,206 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('77_May_15_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+library(shiny)
+ui <- bslib::page_fluid(
+  bslib::layout_column_wrap(
+    selectInput(
+      'species', 
+      'Choose your species', 
+      unique(palmerpenguins::penguins$species)
+    ),
+    selectInput(
+      'island', 
+      'Choose your island', 
+      unique(palmerpenguins::penguins$island)
+    )
+  ),
+  bslib::layout_column_wrap(
+    plotOutput('plot'),
+    DT::dataTableOutput('tbl')
+  )
+)
+```
+
+
+
+```{r}
+library(tidyverse)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      ) |>
+    ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+      geom_point(size = 3)
+  }) 
+  
+  output$tbl <- DT::renderDT({
+    palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      ) 
+  })
+}
+```
+
+
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+```{r}
+filtered_data <- reactive({
+  palmerpenguins::penguins |> 
+    filter(
+      !is.na(sex),
+      species == input$species,
+      island == input$island
+    )
+})
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  filtered_data <- reactive({
+    palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      )
+  })
+  
+  output$plot <- renderPlot({
+    # CALL the reactive
+    filtered_data() |>
+      ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+      geom_point(size = 3)
+  }) 
+  
+  output$tbl <- DT::renderDT({
+    # CALL the reactive
+    filtered_data()
+  })
+}
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  filtered_data <- reactiveVal({
+    palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      )
+  })
+  
+  output$plot <- renderPlot({
+    filtered_data() |>
+      ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+      geom_point(size = 3)
+  }) 
+  
+  output$tbl <- DT::renderDT({
+    filtered_data()
+  })
+}
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  # Intialize reactiveVal()
+  filtered_data <- reactiveVal()
+  observe({
+    dat <- palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      )
+    filtered_data(dat) # update the reactiveVal()
+  })
+  
+  output$plot <- renderPlot({
+    filtered_data() |>
+      ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+      geom_point(size = 3)
+  }) 
+  
+  output$tbl <- DT::renderDT({
+    filtered_data()
+  })
+}
+```
+
+
+```{r}
+server <- function(input, output, session) {
+  # Intialize list
+  r_list <- reactiveValues()
+  observe({
+    dat <- palmerpenguins::penguins |> 
+      filter(
+        !is.na(sex),
+        species == input$species,
+        island == input$island
+      )
+    r_list$filtered_data <- dat # update 
+  })
+  
+  output$plot <- renderPlot({
+    # use data from list (without parantheses)
+    r_list$filtered_data |>
+      ggplot(aes(x = flipper_length_mm, y = bill_depth_mm)) +
+      geom_point(size = 3)
+  }) 
+  
+  output$tbl <- DT::renderDT({
+    # use data from list (without parantheses)
+    r_list$filtered_data
+  })
+}
+```
+
+
