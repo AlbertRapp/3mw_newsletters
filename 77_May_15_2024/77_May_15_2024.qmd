@@ -125,14 +125,17 @@ server <- function(input, output, session) {
 
 ```{r}
 server <- function(input, output, session) {
-  filtered_data <- reactiveVal({
+  # Initialize the reactiveVal()
+  filtered_data <- reactiveVal()
+  # Update the reactiveVal()
+  filtered_data(
     palmerpenguins::penguins |> 
       filter(
         !is.na(sex),
         species == input$species,
         island == input$island
       )
-  })
+  )
   
   output$plot <- renderPlot({
     filtered_data() |>
