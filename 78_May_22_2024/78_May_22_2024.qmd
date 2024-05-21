@@ -1,0 +1,194 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('78_May_22_2024'))
+library(tidyverse)
+```
+
+
+
+
+```{r}
+library(shiny)
+
+ui <- bslib::page_fluid(
+  radioButtons(
+    'yesno', 
+    'Do you like this? ', 
+    c('Yes', 'No'),
+    selected = character(0) # no selection at first
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+```
+
+
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  observe({
+    if (input$yesno == 'Yes') {
+      insertUI(
+        # Place new UI after the radio button
+        # (the element with the id 'yesno')
+        selector = '#yesno', 
+        where = 'afterEnd',
+        # What ui to insert
+        ui = sliderInput(
+          'slider', 
+          'How much do you like this (10 = very)', 
+          min = 1, 
+          max = 10, 
+          value = 5
+        )
+      )
+    } else {
+      insertUI(
+        selector = '#yesno',
+        where = 'afterEnd',
+        ui = textInput('textinput', 'Why not?')
+      )
+    }
+  }) |> bindEvent(input$yesno)
+}
+```
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+server <- function(input, output, session) {
+  observe({
+    if (isTruthy(input$slider) | isTruthy(input$textinput)) {
+      removeUI(
+        selector = 'div.form-group.shiny-input-container:last-of-type'
+      )
+    }
+    
+    if (input$yesno == 'Yes') {
+      insertUI(
+        selector = '#yesno', 
+        where = 'afterEnd',
+        ui = sliderInput(
+          'slider', 
+          'How much do you like this (10 = very)', 
+          min = 1, 
+          max = 10, 
+          value = 5
+        )
+      )
+    } else {
+      insertUI(
+        selector = '#yesno',
+        where = 'afterEnd',
+        ui = textInput('textinput', 'Why not?')
+      )
+    }
+  }) |> bindEvent(input$yesno)
+}
+```
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+ui <- bslib::page_fluid(
+  radioButtons(
+    'yesno', 
+    'Do you like this? ', 
+    c('Yes', 'No'),
+    selected = character(0) # no selection at first
+  ),
+  uiOutput('dynamic_ui')
+)
+```
+
+```{r}
+server <- function(input, output, session) {
+  output$dynamic_ui <- renderUI({
+    if (input$yesno == 'Yes') {
+      sliderInput(
+        'slider', 
+        'How much do you like this (10 = very)', 
+        min = 1, 
+        max = 10, 
+        value = 5
+      )
+    } else {
+      textInput('textinput', 'Why not?')
+    }
+  }) |> bindEvent(input$yesno)
+}
+```
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+ui <- bslib::page_fluid(
+  actionButton('button', 'Move slider to 7'),
+  sliderInput(
+    'slider', 
+    'Move me!', 
+    min = 1, 
+    max = 10, 
+    value = 5
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$button, {
+    updateSliderInput(
+      session, 
+      'slider', 
+      value = 7
+    )
+  })
+}
+```
+
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+
+
+
+
