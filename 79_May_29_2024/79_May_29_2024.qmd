@@ -1,0 +1,118 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('79_May_29_2024'))
+library(tidyverse)
+```
+
+
+
+```{r}
+library(shiny)
+ui <- bslib::page_fluid(
+  verbatimTextOutput('datA'),
+  verbatimTextOutput('datB')
+)
+
+server <- function(input, output, session) {
+  output$datA <- renderPrint({
+    glue::glue(
+      'The Iris data set has {nrow(iris)} rows 
+      and {ncol(iris)} columns'
+    )
+  })
+  
+  output$datB <- renderPrint({
+    penguins <- palmerpenguins::penguins
+    glue::glue(
+      'The Palmer Penguins data set has {nrow(penguins)} rows 
+      and {ncol(penguins)} columns'
+    )
+  })
+}
+
+```
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
+
+```{r}
+text_UI <- function(id) {
+  ns <- NS(id)
+  tagList(
+  
+  )
+}
+
+text_Server <- function(id) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      
+    }
+  )
+}
+```
+
+
+
+```{r}
+text_UI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    verbatimTextOutput(ns('data'))
+  )
+}
+```
+
+
+```{r}
+ui <- bslib::page_fluid(
+  text_UI('iris'),
+  text_UI('penguins')
+)
+
+server <- function(input, output, session) {
+  text_Server('iris', iris)
+  text_Server('penguins', palmerpenguins::penguins)
+}
+```
+
+```{r}
+ui <- bslib::page_fluid(
+  text_UI('iris'),
+  text_UI('penguins'),
+  text_UI('mtcars'),
+  text_UI('diamonds')
+)
+
+server <- function(input, output, session) {
+  text_Server('iris', iris)
+  text_Server('penguins', palmerpenguins::penguins)
+  text_Server('mtcars', mtcars)
+  text_Server('diamonds', ggplot2::diamonds)
+}
+```
+
+
+```{r}
+#| eval: false
+shinyApp(ui, server)
+```
+
+
