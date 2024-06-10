@@ -1,0 +1,222 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('82_Jun_19_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+#| eval: false
+library(shiny)
+ui <- bslib::page_fluid(
+  selectInput(
+      "dropdown", 
+      "Choose a chart", 
+      choices = c("bar", "boxplot")
+  ),
+  plot_UI("plot")
+)
+```
+
+
+
+```{r}
+#| eval: false
+library(ggplot2)
+plot_UI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    plotOutput(ns("plot"))
+  )
+}
+
+plot_Server <- function(id, dropdown_choice) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      output$plot <- renderPlot({
+        if (dropdown_choice == "bar") {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl))
+          ) + 
+            geom_bar(fill = 'dodgerblue4')
+        
+        } else {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl), y = mpg)
+          ) + 
+            geom_boxplot(
+              color = 'dodgerblue4',
+              linewidth = 1.5
+            )
+        
+        }
+        
+        p +
+          theme_minimal(base_size = 16)
+      })
+    }
+  )
+}
+```
+
+
+
+
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  plot_Server("plot", 'bar') # hard-code 2nd argument
+}
+shinyApp(ui, server)
+```
+
+
+
+
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  plot_Server(
+    "plot", 
+    input$dropdown # replace hard-coded argument
+  ) 
+}
+shinyApp(ui, server)
+```
+
+
+
+
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  dropdown_choice <- reactive(input$dropdown)
+  plot_Server(
+    "plot", 
+    dropdown_choice # pass reactive instead of value
+  ) 
+}
+```
+
+
+```{r}
+#| eval: false
+plot_Server <- function(id, dropdown_choice) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      
+      output$plot <- renderPlot({
+        # CALL REACTIVE HERE WITH ()
+        if (dropdown_choice() == "bar") {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl))
+          ) + 
+            geom_bar(fill = 'dodgerblue4')
+        
+        } else {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl), y = mpg)
+          ) + 
+            geom_boxplot(
+              color = 'dodgerblue4',
+              linewidth = 1.5
+            )
+        
+        }
+        
+        p +
+          theme_minimal(base_size = 16)
+      })
+    }
+  )
+}
+
+shinyApp(ui, server)
+```
+
+
+
+
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  # Use reactiveValues() instead of reactive()
+  shared_data <- reactiveValues()
+  observe({
+     shared_data$dropdown_choice <- input$dropdown
+  })
+  
+  plot_Server(
+    "plot", 
+    shared_data 
+  ) 
+}
+```
+
+
+```{r}
+#| eval: false
+# Rename argument to `shared_data` 
+plot_Server <- function(id, shared_data) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      
+      output$plot <- renderPlot({
+        # Use new notation to access the value
+        if (shared_data$dropdown_choice == "bar") {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl))
+          ) + 
+            geom_bar(fill = 'dodgerblue4')
+        
+        } else {
+          
+          p <- ggplot(
+            mtcars, aes(x = factor(cyl), y = mpg)
+          ) + 
+            geom_boxplot(
+              color = 'dodgerblue4',
+              linewidth = 1.5
+            )
+        
+        }
+        
+        p +
+          theme_minimal(base_size = 16)
+      })
+    }
+  )
+}
+
+shinyApp(ui, server)
+```
+
