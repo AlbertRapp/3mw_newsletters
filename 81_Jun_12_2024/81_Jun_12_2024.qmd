@@ -1,0 +1,81 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('81_Jun_12_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+```{r}
+library(shiny)
+table_UI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    selectInput(
+      ns("data"), 
+      "Data", 
+      choices = c("mtcars", "iris")
+    ),
+    tableOutput(ns("table"))
+  )
+}
+
+table_Server <- function(id) {
+  moduleServer(
+    id,
+    function(input, output, session) {
+      output$table <- renderTable({
+        get(input$data)
+      })
+    }
+  )
+}
+```
+
+
+
+```{r}
+ui <- fluidPage(
+  table_UI("table")
+)
+server <- function(input, output, session) {
+  table_Server("table")
+}
+shinyApp(ui, server)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
