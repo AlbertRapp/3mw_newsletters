@@ -1,0 +1,127 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('83_Jun_26_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+```{r}
+#| eval: false
+golem::fill_desc(
+  pkg_name = "golem3MW",
+  pkg_title = "This is the title of my package", 
+  pkg_description = "Description ending in a full stop.",
+  author_first_name = "Albert",
+  author_last_name = "Rapp",
+  author_email = "3MW@albert-rapp.de",
+  repo_url = NULL, 
+  pkg_version = "0.0.0.9000"
+)
+```
+
+
+```{r}
+#' The application User-Interface
+#'
+#' @param request Internal parameter for `{shiny}`.
+#'     DO NOT REMOVE.
+#' @import shiny
+#' @noRd
+app_ui <- function(request) {
+  tagList(
+    # Leave this function for adding external resources
+    golem_add_external_resources(),
+    # Your application UI logic
+    fluidPage(
+      h1("golem3MW")
+    )
+  )
+}
+
+# There's more code in this file but just ignore this for now.
+```
+
+```{r}
+#' The application server-side
+#'
+#' @param input,output,session Internal parameters for {shiny}.
+#'     DO NOT REMOVE.
+#' @import shiny
+#' @noRd
+app_server <- function(input, output, session) {
+  # Your application server logic
+}
+```
+
+```{r}
+app_ui <- function(request) {
+  tagList(
+    # Leave this function for adding external resources
+    golem_add_external_resources(),
+    # Your application UI logic
+    fluidPage(
+      h1("golem3MW"),
+      selectInput(
+        'my_selection',
+        "What's your favorite fruit?",
+        choices = stringr::fruit 
+        # Fruit vector is part of the {stringr} package
+      ),
+      textOutput('selection_output')
+    )
+  )
+}
+```
+
+
+
+```{r}
+app_server <- function(input, output, session) {
+  # Your application server logic
+  
+  output$selection_output <- renderText({
+    glue::glue(
+      'Your favorite fruit is {input$my_selection}'
+    )
+  })
+}
+```
+
+
+---
+
+# Running the Golem App
+
+Once you have that, you might wonder how to execute and start the app.
+The way to do that is to use the `run_app()` function from Golem, which will take care of everything.
+You could type `golem::run_app()` into your console, and this will start your app.
+Alternatively, what I prefer to do is to hit `Ctrl+Shift+P` to open the RStudio command palette and select *"Golem: Run Dev"* from there.
+
+SCREENSHOT
+
+---
+
+# Conclusion
+
+With that, you have an idea of how to make basic changes to the UI and server of your Golem app.
+Next week, I'm going to explain more on the workflow of how to work with this and how to build out a Golem app that consists of modules.
