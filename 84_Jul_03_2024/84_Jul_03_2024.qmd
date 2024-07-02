@@ -1,0 +1,146 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+editor_options: 
+  chunk_output_type: console
+execute: 
+  eval: false
+---
+
+```{r}
+setwd(here::here('84_Jul_03_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+```{r}
+golem::add_module(
+  name = "fruit_picker",
+  with_test = TRUE
+)
+```
+
+
+
+```{r}
+#' fruit_picker UI Function
+#'
+#' @description A shiny Module.
+#'
+#' @param id,input,output,session Internal parameters for {shiny}.
+#'
+#' @noRd 
+#'
+#' @importFrom shiny NS tagList 
+mod_fruit_picker_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+ 
+  )
+}
+```
+
+
+
+```{r}
+#' fruit_picker Server Functions
+#'
+#' @noRd 
+mod_fruit_picker_server <- function(id){
+  moduleServer( id, function(input, output, session){
+    ns <- session$ns
+ 
+  })
+}
+```
+
+
+
+```{r}
+## To be copied in the UI
+# mod_fruit_picker_ui("fruit_picker_1")
+    
+## To be copied in the server
+# mod_fruit_picker_server("fruit_picker_1")
+```
+
+
+
+```{r}
+mod_fruit_picker_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    selectInput(
+      ns('my_selection'),
+      "What's your favorite fruit?",
+      choices = stringr::fruit
+    ),
+    textOutput(ns('selection_output'))
+  )
+}
+```
+
+```{r}
+mod_fruit_picker_server <- function(id){
+  moduleServer( id, function(input, output, session){
+    ns <- session$ns
+    output$selection_output <- renderText({
+      glue::glue(
+        'Your favorite fruit is {input$my_selection}'
+      )
+    })
+  })
+}
+```
+
+
+
+```{r}
+library(shiny)
+
+ui <- bslib::page_fluid(
+  mod_fruit_picker_ui("fruit_picker_1")
+)
+
+server <- function(input, output, session) {
+  mod_fruit_picker_server("fruit_picker_1")
+}
+
+shinyApp(ui, server)
+```
+
+
+```{r}
+#' @importFrom shiny NS tagList
+#' @import dplyr
+mod_fruit_picker_ui <- function(id){
+  ns <- NS(id)
+  tagList(
+    selectInput(
+      ns('my_selection'),
+      "What's your favorite fruit?",
+      choices = stringr::fruit
+    ),
+    textOutput(ns('selection_output'))
+  )
+}
+```
+
+
+
