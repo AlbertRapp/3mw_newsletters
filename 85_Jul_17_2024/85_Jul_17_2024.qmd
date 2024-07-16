@@ -1,0 +1,166 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('85_Jul_17_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+```{r}
+#| eval: false
+output$my_output <- renderPlot({
+  # Lots
+  # and
+  # lots
+  # and
+  # lots
+  # of 
+  # code
+  # to 
+  # generate
+  # a 
+  # nice
+  # chart
+})
+```
+
+```{r}
+#| eval: false
+output$my_output <- renderPlot({
+  generate_nice_chart(data = my_data_set)
+})
+```
+
+
+
+```{r}
+#| eval: false
+golem::add_fct("generate_nice_chart", with_test = TRUE)
+```
+
+
+
+```{r}
+#| eval: false
+output$selection_output <- renderText({
+  glue::glue(
+    'Your favorite fruit is {input$my_selection}'
+  )
+})
+```
+
+
+
+```{r}
+#| eval: false
+golem::add_fct("generate_fruit_text", with_test = TRUE)
+```
+
+
+```{.r}
+#' generate_fruit_text 
+#'
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#'
+#' @noRd
+```
+
+
+
+```{.r}
+#' generate_fruit_text 
+#'
+#' @description A fct function
+#'
+#' @return The return value, if any, from executing the function.
+#'
+#' @noRd
+generate_fruit_text <- function(fruit_name) {
+  glue::glue(
+    'Your favorite fruit is {fruit_name}'
+  )
+}
+```
+
+
+
+```{.r}
+#' generate_fruit_text 
+#'
+#' @param fruit_name A length-one character vector containing your favorite fruit
+#'  
+#' @description Generates the text for the favorite fruit sentence in the UI
+#'
+#' @return Returns a string
+#'
+#' @noRd
+generate_fruit_text <- function(fruit_name) {
+  glue::glue(
+    'Your favorite fruit is {fruit_name}'
+  )
+}
+```
+
+
+
+```{r}
+#| eval: false
+output$selection_output <- renderText({
+  generate_fruit_text(input$my_selection)
+})
+```
+
+
+```{r}
+#| eval: false
+library(shiny)
+
+ui <- bslib::page_fluid(
+  mod_fruit_picker_ui("fruit_picker_1")
+)
+
+server <- function(input, output, session) {
+  mod_fruit_picker_server("fruit_picker_1")
+}
+
+shinyApp(ui, server)
+```
+
+
+```{r}
+#| eval: false
+devtools::load_all()
+```
+
+
+
+
+
+
+
+
+
+
+
+
