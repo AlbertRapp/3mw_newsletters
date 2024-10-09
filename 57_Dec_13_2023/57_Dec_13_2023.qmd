@@ -43,6 +43,7 @@ This would give us a boring button like this.
 library(shiny)
 
 ui <- fluidPage(
+  tags$br(),
   actionButton(
     inputId = 'my_cool_btn',
     label = 'Click me!'
@@ -62,9 +63,21 @@ In Py-Shiny, we can generate the same boring button like this:
 
 ```{python}
 #| eval: false
+ui.input_action_button(
+  id = 'my_cool_btn',
+  label = 'Click me!'
+)
+```
+
+
+```{python}
+#| eval: false
 from shiny import  App, ui, run_app
 
 app_ui = ui.page_fluid(
+    ui.div(
+      style = 'height:50px'
+    ),
     ui.input_action_button(
       id = 'my_cool_btn',
       label = 'Click me!'
@@ -104,6 +117,15 @@ actionButton(
   )
 ```
 
+```{python}
+#| eval: false
+ui.input_action_button(
+  id = 'my_cool_btn',
+  label = 'Click me!',
+  style = 'border-radius: 10px; height: 50px; width: 100px; font-weight: bold;'
+)
+```
+
 This will give us a button that looks differnt but not really fancy either.
 Here's how it looks.
 
@@ -117,7 +139,7 @@ ui <- fluidPage(
   actionButton(
     inputId = 'my_cool_btn',
     label = 'Click me!',
-    style = 'border-radius: 10px; width: 200px; font-weight: bolder;'
+    style = 'border-radius: 10px; width: 200px; font-weight: bolder;margin-top:10px;'
   )
 )
 
@@ -231,6 +253,42 @@ import htmltools
 my_python_button = ui.input_action_button(
   id = 'my_cool_btn',
   label = 'Click me!',
+  style = 'border-radius: 10px; height: 50px; width: 100px; font-weight: bold;padding:0px;margin-top:10px;'
+)
+
+# ui.input_action_button(
+#   id = 'my_cool_btn',
+#   label = 'Click me!',
+#   style = htmltools.css(
+#     border_radius = '10px',
+#     width = '200px',
+#     font_weight = 'bolder',
+#     margin = '10px',
+#     padding = '15px',
+#     font_size = '32px',
+#     color = "#333333",
+#     background =  'linear-gradient(43deg, #C6FFDD 0%, #FBD786 46%, #f7797d 100%)',
+#     border = '3px solid #333333'
+#   )
+# )
+
+app_ui = ui.page_fluid(
+    my_python_button
+)
+
+def server(input, output, session):
+    ... # Server logic here
+
+app = App(app_ui, server)
+run_app(app) # start the app
+```
+
+
+```{python}
+#| eval: false
+ui.input_action_button(
+  id = 'my_cool_btn',
+  label = 'Click me!',
   style = htmltools.css(
     border_radius = '10px',
     width = '200px',
@@ -243,16 +301,6 @@ my_python_button = ui.input_action_button(
     border = '3px solid #333333'
   )
 )
-
-app_ui = ui.page_fluid(
-    my_python_button
-)
-
-def server(input, output, session):
-    ... # Server logic here
-
-app = App(app_ui, server)
-run_app(app) # start the app
 ```
 
 Neat!
@@ -272,7 +320,7 @@ The code for that is pretty much the same code from last week plus the new butto
 
 ```{python}
 #| eval: false
-from shiny import  App, ui, run_app, render 
+from shiny import  App, ui, run_app, render , reactive
 app_ui = ui.page_fluid(
     ui.layout_sidebar(
       
@@ -328,13 +376,24 @@ For our current use case, what we need from that list is `reactive.event()`.
 This one is really easy. 
 It's just another decorator (the scientific term is `@`-thingy) that we need to include for our render call.
 
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  output$text_output <- renderText({
+    paste(
+      input$numeric_input,
+      input$text_input
+    )
+  }) |> bindEvent(input$my_cool_btn)
+}
+```
+
 ```{python}
 #| eval: false
-from shiny import reactive
 def server(input, output, session):
   @output
   @render.text
-  @reactive.event(input.my_cool_btn) # Make reactive wrt. button with id "my_cool_btn"
+  @reactive.event(input.my_cool_btn)
   def text_output():
     return input.text_input() + ' ' + str(input.numeric_input())
 ```

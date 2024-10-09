@@ -1,0 +1,218 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('88_Aug_07_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+## Fake data
+
+Let's first create a dummy data set using one of `{gt}`'s built-in data sets (`{gt}` has a lot of those)
+
+```{r}
+#| warning: false
+#| message: false
+library(tidyverse)
+library(gt)
+hawaiian_sales <- gt::pizzaplace |> 
+  filter(name == 'hawaiian') |> 
+  mutate(
+    month = month(
+      date, label = TRUE, abbr = FALSE,
+      locale = 'en_US' # English month names
+    ),
+    quarter = paste0('Q', quarter(date))
+  ) |> 
+  summarise(
+    sales = n(),
+    revenue = sum(price),
+    .by = c(month, quarter)
+  )
+hawaiian_sales
+```
+
+
+## Base Layer
+
+```{r}
+gt(hawaiian_sales)
+```
+
+
+
+## Use better column names
+
+
+```{r}
+gt(hawaiian_sales) |> 
+  cols_label(
+    month = 'Month',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  )
+```
+
+## Title & Subtitle
+
+
+```{r}
+gt(hawaiian_sales) |> 
+  cols_label(
+    month = 'Month',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  tab_header(
+    title = md('**Hawaiian Pizza Sales in 2015**'),
+    subtitle = md('Based on the fake `pizzaplace` data from `{gt}`')
+  )
+```
+
+
+## Align columns
+
+```{r}
+gt(hawaiian_sales) |> 
+  cols_label(
+    month = 'Month',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  tab_header(
+    title = md('**Hawaiian Pizza Sales in 2015**'),
+    subtitle = md('Based on the fake `pizzaplace` data from `{gt}`')
+  ) |> 
+  cols_align(
+    align = 'left',
+    columns = month
+  )
+```
+
+
+## Format numbers
+
+```{r}
+gt(hawaiian_sales) |> 
+  cols_label(
+    month = 'Month',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  tab_header(
+    title = md('**Hawaiian Pizza Sales in 2015**'),
+    subtitle = md('Based on the fake `pizzaplace` data from `{gt}`')
+  ) |> 
+  cols_align(
+    align = 'left',
+    columns = month
+  ) |> 
+  fmt_currency(columns = revenue)
+```
+
+
+## Add groups
+
+```{r}
+grouped_table <- gt(
+  hawaiian_sales, 
+  groupname_col = 'quarter' # Set group to quarter column
+) |> 
+  cols_label(
+    month = 'Month',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  tab_header(
+    title = md('**Hawaiian Pizza Sales in 2015**'),
+    subtitle = md('Based on the fake `pizzaplace` data from `{gt}`')
+  ) |> 
+  cols_align(
+    align = 'left',
+    columns = month
+  ) |> 
+  fmt_currency(columns = revenue)
+grouped_table
+```
+
+
+## Add summaries
+
+
+```{r}
+group_summary_table <- grouped_table |> 
+  summary_rows(
+    columns = sales,
+    fns = list(
+      list(label = md('**Total**'), fn = 'sum'),
+      list(label = md('**Maximum**'), fn = 'max')
+    )
+  ) |> 
+  summary_rows(
+    columns = revenue,
+    fns = list(
+      list(label = md('**Total**'), fn = 'sum'),
+      list(label = md('**Maximum**'), fn = 'max')
+    ),
+    fmt = ~ fmt_currency(.)
+  )
+group_summary_table
+```
+
+
+## Change row height
+
+```{r}
+group_summary_table |> 
+  tab_options(
+    data_row.padding = px(0),
+    summary_row.padding = px(0),
+    row_group.padding = px(0),
+    column_labels.padding = px(1),
+    heading.padding = px(1)
+  )
+```
+
+## Change style of summary rows
+
+```{r}
+group_summary_table |> 
+  tab_options(
+    data_row.padding = px(0),
+    summary_row.padding = px(0),
+    row_group.padding = px(0),
+    column_labels.padding = px(1),
+    heading.padding = px(1)
+  ) |> 
+  tab_style(
+    location = cells_summary(),
+    style = list(
+      cell_text(weight = 'bold'),
+      cell_fill(color = 'dodgerblue4', alpha = 0.1)
+    )
+  )
+```
+
+
+
+
+

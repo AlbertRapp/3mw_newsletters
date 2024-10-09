@@ -1,0 +1,348 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('90_Aug_21_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+Many greetings from Munich, Germany. Are you done with tables yet? I hope not. The R ecosystem has more to offer.
+
+Over the last two weeks, we have covered the fantastic `{gt}` and `{reactable}` packages.
+Both are excellent at what they do.
+`{gt}` has an impeccable workflow to create static tables and `{reactable}` is the ultra-champ at creating interactive tables.
+Today, we get to know another champion.
+Namely, `{flextable}`.
+But before that, time for two short little announcement:
+
+
+---
+
+# `{reactable}` video tutorial
+
+Looking for a video version of last week's newsletter?
+Well, look no further.
+I've created a video intro on `{reactable}` with a couple more features that we didn't even cover in the newsletter. Check it out on Youtube:
+
+LINK
+
+
+# Data Cleaning Master Class Part 2
+
+Part 2 of my [**Data Cleaning Master Class**](https://data-cleaning.albert-rapp.de/) is about to be released.
+I'm in the midst of final video editing and then everything Part 2 will be released within the next 14 days.
+
+Part 2 will cover 
+
+- a myriad of data formats, 
+- show you how to read them into R and 
+- clean them so that you can work with that data.
+
+And the most important part:
+As I release another part of the course, the price of the course will rise to $175.
+So if you've been on the fence and want to save some money, now is your chance:
+
+LINK BOX
+
+Now, let's dive into this week's issue.
+
+---
+
+# What can `{flextable}` do for me?
+
+The biggest feature of `{flextable}` is that it has the strongest export capabilities to Microsoft Office files like Word documents or Powerpoint slides.
+Thus, if you frequently find yourself copying a data table over to Word or Powerpoint, then look no more.
+Let `{flextable}` handle that for you.
+
+---
+
+# Mini Tutorial
+
+## Fake data
+
+Let’s create a similar table that we have created in the last two weeks.
+By now, you probably now the data set by heart.
+
+
+```{r}
+#| warning: false
+#| message: false
+library(tidyverse)
+hawaiian_sales <- gt::pizzaplace |> 
+  filter(name == 'hawaiian') |> 
+  mutate(
+    month = month(
+      date, label = TRUE, abbr = FALSE,
+      locale = 'en_US.UTF-8' # English month names
+    ),
+    quarter = paste0('Q', quarter(date))
+  ) |> 
+  summarise(
+    sales = n(),
+    revenue = sum(price),
+    .by = c(month, quarter)
+  )
+hawaiian_sales
+```
+
+
+## Base Layer
+
+Just like all the other table packages, the first step is really simple with `{flextable}`.
+Just throw your data into the `flextable()` function.
+
+```{r}
+#| warning: false
+#| message: false
+library(flextable)
+flextable(hawaiian_sales)
+```
+
+TABLE
+
+
+---
+
+## Use better column names
+
+Now, let's do better column names again.
+Let's go for title case.
+And the nice thing with `{flextable}` is that it allows a pipe-able code style like `{gt}`.
+
+```{r}
+flextable(hawaiian_sales) |> 
+  set_header_labels(
+    month = 'Month',
+    quarter = 'Quarter',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  )
+```
+
+TABLE
+
+---
+
+## Title & Subtitle
+
+For adding a nice title and subtitle to your plot, you can add so-called header lines.
+
+```{r}
+flextable(hawaiian_sales) |> 
+  set_header_labels(
+    month = 'Month',
+    quarter = 'Quarter',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  add_header_lines(
+    'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  add_header_lines(
+    'Based on the fake `pizzaplace` data from `{gt}`'
+  )
+```
+
+TABLE
+
+---
+
+## Format numbers
+
+The numbers in the revenue column correspond to dollar amounts. We can format them by specifying a column format with one of the `colformat_*()` functions.
+Unfortunately, there's no such thing as `colformat_currency()` so we'll have to improvise with `colformat_double()`.
+
+```{r}
+flextable(hawaiian_sales) |> 
+  set_header_labels(
+    month = 'Month',
+    quarter = 'Quarter',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  add_header_lines(
+    'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  add_header_lines(
+    'Based on the fake `pizzaplace` data from `{gt}`'
+  ) |> 
+  colformat_double(
+    j = 'revenue',
+    digits = 2,
+    prefix = '$'
+  )
+```
+
+TABLE
+
+---
+
+## Add groups
+
+Now, I want to structure my tables into quarters. 
+The easiest way to do that is to use the quarter column in our data set for grouping.
+
+But `flextable()` doesn't allow to do that inside of the function.
+Instead one has to pass in the data as grouped data set.
+
+
+```{r}
+hawaiian_sales |> 
+  as_grouped_data(groups = 'quarter') |> 
+  flextable() |> 
+  set_header_labels(
+    month = 'Month',
+    quarter = 'Quarter',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  add_header_lines(
+    'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  add_header_lines(
+    'Based on the fake `pizzaplace` data from `{gt}`'
+  ) |> 
+  colformat_double(
+    j = 'revenue',
+    digits = 2,
+    prefix = '$'
+  )
+```
+
+TABLE
+
+---
+
+## Add summaries
+
+For adding summaries to a table, `{flexbox}` is actually one of the trickiest packages.
+You will have to calculate totals yourself and assemble a new data set.
+
+```{r}
+order_of_months_w_total <- c(
+  levels(hawaiian_sales$month),
+  'Total'
+)
+
+totals <- hawaiian_sales |> 
+  summarise(
+    month = factor(
+      'Total',
+      levels = order_of_months_w_total
+    ),
+    sales = n(),
+    revenue = sum(revenue),
+    .by = quarter
+  ) 
+
+combined_data <- hawaiian_sales |> 
+  mutate(
+    month = factor(
+      month, 
+      levels = order_of_months_w_total,
+      ordered = FALSE
+    )
+  ) |> 
+  bind_rows(totals) |> 
+  arrange(quarter, month)
+combined_data
+```
+
+And then you can throw that into the `{flextable}` again.
+
+```{r}
+table_with_totals <- combined_data |> 
+  as_grouped_data(groups = 'quarter') |> 
+  flextable() |> 
+  set_header_labels(
+    month = 'Month',
+    quarter = 'Quarter',
+    sales = 'Sales',
+    revenue = 'Revenue'
+  ) |> 
+  add_header_lines(
+    'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  add_header_lines(
+    'Based on the fake `pizzaplace` data from `{gt}`'
+  ) |> 
+  colformat_double(
+    j = 'revenue',
+    digits = 2,
+    prefix = '$'
+  )
+table_with_totals
+```
+
+
+TABLE
+
+
+## Change row styling
+
+Finally, to add a little bit more style and visual structure let us make the group rows blue.
+And the totals bold.
+For that, you can use the `bg()` and `bold()` functions to apply the styles.
+And to target specific rows, you need to see `i` to a function (using the `~` notation) that evaluates to `TRUE`s and `FALSE`s.
+
+```{r}
+styled_table <- table_with_totals |> 
+  bg(
+    i = ~!is.na(quarter),
+    bg = '#E7EDF3'
+  ) |> 
+  bold(
+    i = ~(month == 'Total')
+  )
+styled_table
+```
+
+TABLE
+
+
+---
+
+# Export
+
+Finally, we can make use of `{flexbox}` fantastic export capabilities and export to Word....
+
+```{r}
+styled_table |> 
+  save_as_docx(
+    path = 'word_export.docx'
+  )
+```
+
+IMAGE
+
+...or to Powerpoint (though you might want to do that with a table that fits into a rectangular slide)
+
+```{r}
+styled_table |> 
+  save_as_pptx(
+    path = 'powerpoint_export.pptx'
+  )
+```
+
+IMAGE 2
+
+

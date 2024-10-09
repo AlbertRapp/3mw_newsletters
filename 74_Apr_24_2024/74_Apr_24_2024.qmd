@@ -1,0 +1,96 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('74_Apr_24_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+I recently came to realize that way too many people who use R & RStudio do not use RStudio projects.
+And that is super unfortunate because it's a low effort productivity boost to use R projects.
+So let me tell you the advantages of R projects and how to set it up (which is also easy.)
+
+---
+
+# Advantage 1: No Need to Think About File Path Switching
+
+If there's one thing I find highly annoying, then it's file path switching and setting working directories.
+And the good news is that you don't really have to use `setwd()` and then navigate to some weird long-winded path.
+All you have to do is to set up an RStudio project and whereever that project lives, that's the working directory.
+
+---
+
+# Advantage 2: Easy Navigation Between Projects
+
+RStudio projects makes it super easy to navigate between other projects.
+You could easily have two projects open at the same time within two different RStudio sessions.
+This way, if you repeat something or do something similar from another project, you can easily switch to that project, see all the files, get that code from over there, and then put this into your new project.
+
+---
+
+# Advantage 3: RStudio Projects Remember Where You Left Off
+
+RStudio projects, when you open them, show you where you left off.
+The same files are opened and you can just work as if you've just closed down your computer and fired it up again.
+This means that you don't have to close all the files from one project and open all the files from another project when you have to switch between two projects.
+
+---
+
+# Advantage 4: Easy Version Control with `renv`
+
+
+RStudio projects make it super easy to version control your packages using the `renv` package.
+That way you can be more confident that when you open up your project in two years, all of the packages that you used are documented with version numbers and therefore your code should still run.
+This is especially important if you use R in a company that uses the same scripts over and over again.
+You really want to avoid that the next person who's working with your script has to figure out what kind of version of the packages these scripts use.
+
+This is a huge productivity gain for everyone.
+And now that you know all the cool advantages of RStudio projects, let me tell you how do set them up and (if you want) how to use `renv`.
+
+---
+
+# How to Set Up RStudio Projects
+
+In RStudio, all you have to do is to click on "New Project", and in there, you can just follow the instructions to set up a new project and put it in the directory that you want to use.
+
+SCRRENSHOT
+
+Once you have that, you can open this project either by clicking on the `.Rproj` file or within the navigator in RStudio, clicking on the list and opening up your project.
+And if you want to use `renv`, you can just click on the toggle that says "Set up an renv project" when you open the new project setup.
+
+SCREENSHOT
+
+The only thing you have to remember is that in an `renv` project, it is as if you haven't installed any packages on your computer.
+You just basically start this project with a clean slate.
+Outside of that project, you still have all the packages that are installed on your computer, but inside there isn't anything.
+If you want to use a particular package, you will have to install it, but instead of calling `install.packages()`, use `renv::install()` to install.
+
+
+Other than that, you have to remember that you need to document the versions of these packages, and that's where `renv::snapshot()` comes in.
+This will document all the packages into a so-called lock file.
+This lock file only uses the packages that you **actually use** within your project.
+
+So if you did install `ggplot2`, but you don't actually use this package, then this snapshot will not update and include `ggplot2`. 
+You see, the lock file is supposed to be a list of the minimal amount of packages that you need to run the code that is inside of your project.
+That's why `renv` will auto-detect what packages you actually use, and if for some reason `renv` doesn't see that you actually use a package, you can just throw in a `library()` which `renv` will definitely detect.
+
+
+These are some productivity tools that help you to use R projects and use versioning.

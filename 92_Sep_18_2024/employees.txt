@@ -1,0 +1,28 @@
+Department: Marketing
+Sub-department: Digital Marketing
+Employee ID: E001 | Name: John Smith | Position: Marketing Manager | Hire Date: 2022-03-15
+Employee ID: E002 | Name: Olivia Miller | Position: Social Media Coordinator | Hire Date: 2023-01-10
+Employee ID: E003 | Name: Noah Garcia | Position: Content Specialist | Hire Date: 2021-05-18
+Sub-department: Advertising
+Employee ID: E004 | Name: Emma Lee | Position: Advertising Manager | Hire Date: 2020-07-14
+Employee ID: E005 | Name: Liam Davis | Position: Media Buyer | Hire Date: 2021-10-02
+Department: Sales
+Sub-department: Domestic Sales
+Employee ID: E006 | Name: Sarah Johnson | Position: Sales Representative | Hire Date: 2021-06-12
+Employee ID: E007 | Name: Ava Martinez | Position: Account Executive | Hire Date: 2020-09-04
+Sub-department: International Sales
+Employee ID: E008 | Name: William Rodriguez | Position: Sales Manager | Hire Date: 2018-07-21
+Employee ID: E009 | Name: James Lopez | Position: Sales Associate | Hire Date: 2022-02-15
+Department: IT
+Sub-department: Infrastructure
+Employee ID: E010 | Name: Michael Brown | Position: Systems Administrator | Hire Date: 2019-11-01
+Employee ID: E011 | Name: Lucas Hernandez | Position: Network Engineer | Hire Date: 2020-03-12
+Sub-department: Development
+Employee ID: E012 | Name: Charlotte Wilson | Position: Software Developer | Hire Date: 2021-08-25
+Employee ID: E013 | Name: Ethan Martinez | Position: Help Desk Technician | Hire Date: 2022-05-14
+Department: Finance
+Sub-department: Accounting
+Employee ID: E014 | Name: Emily Davis | Position: Financial Analyst | Hire Date: 2020-09-23
+Employee ID: E015 | Name: Benjamin Anderson | Position: Junior Accountant | Hire Date: 2021-01-16
+Sub-department: Payroll
+Employee ID: E016 | Name: Abigail Thomas | Position: Payroll Specialist | Hire Date: 2019-12-19

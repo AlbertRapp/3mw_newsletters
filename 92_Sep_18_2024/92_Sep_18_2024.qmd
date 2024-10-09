@@ -1,0 +1,263 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('92_Sep_18_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+I wish I could tell you that data always comes in a nice format.
+Unfortunately, that's not true.
+Just this week, I had to get creative to get data from a dumb text source into R.
+So today, I'm showing you a simplified version of what I had to do.
+
+---
+
+# Employee Data
+
+Imagine that you want to do an analysis using employee data.
+But unfortunately you don't have access to a data base that contains stuff like names, positions and department information.
+Instead what you might have access to is a dumb list/PDF file that looks something like this.
+
+IMAGE
+
+That's not very cool.
+But today I'm showing you how to still make this work.
+
+---
+
+# Good old copy & paste
+
+The first thing you have to do is really low tech.
+Just take your PDF file, highlight the things that you need and then copy that stuff into a text file.
+Here's how that could look.
+
+IMAGE
+
+---
+
+# Reading lines
+
+Next, we have to load the plain text file.
+We can do that with the `read_lines()` function to get all the lines in our file into a seperate element of a vector.
+
+```{r}
+library(tidyverse)
+read_lines('employees.txt')
+```
+
+
+---
+
+# Extract Department information
+
+Now, with the `str_extract()` function you extract those lines that match a certain pattern.
+For that, you can also use what is known as regular expressions.
+Here, we don't need much of that powerful regex language.
+Instead, we just use `.+` as a catch-all argument to tell `str_extract()` to expect a whole bunch of characters after the things we hard-code.
+
+```{r}
+read_lines('employees.txt') |> 
+  str_extract('Department: .+')
+```
+
+Same thing could be done with the sub departments.
+
+```{r}
+read_lines('employees.txt') |> 
+  str_extract('Sub-department: .+') 
+```
+
+---
+
+
+
+# Extract only groups
+
+Note that this also returns the words "Department" and "Sub-department" all the time.
+We can avoid that by specifying regex groups with parantheses and telling `str_extract()` to return only the matched group.
+
+
+```{r}
+read_lines('employees.txt') |> 
+  str_extract('Department: (.+)', group = TRUE)
+
+read_lines('employees.txt') |> 
+  str_extract('Sub-department: (.+)', group = TRUE)
+```
+
+
+---
+
+# Stick that into a tibble
+
+Cool.
+Now we can stick that into a tibble and fill in the NA entries.
+First the tibble:
+
+```{r}
+tibble(
+  lines = read_lines('employees.txt'),
+  department = str_extract(
+    lines, 'Department: (.+)', group = TRUE
+  ),
+  sub_department = str_extract(
+    lines, 'Sub-department: (.+)', group = TRUE
+  )
+) 
+```
+
+Then, we can fill it:
+
+```{r}
+tibble(
+  lines = read_lines('employees.txt'),
+  department = str_extract(
+    lines, 'Department: (.+)', group = TRUE
+  ),
+  sub_department = str_extract(
+    lines, 'Sub-department: (.+)', group = TRUE
+  )
+) |> 
+  fill(department, sub_department)
+```
+
+---
+
+# Filter unneccesasary rows
+
+With this we can now get rid of the lines that have no information an the employees like the first and second line.
+For that, we simply check occurs "(D|d)epartment" in the `lines` column.
+This notation checks whether we use a capital or lower "D".
+
+```{r}
+tibble(
+  lines = read_lines('employees.txt'),
+  department = str_extract(
+    lines, 'Department: (.+)', group = TRUE
+  ),
+  sub_department = str_extract(
+    lines, 'Sub-department: (.+)', group = TRUE
+  )
+) |> 
+  fill(department, sub_department) |> 
+  filter(str_detect(lines, '(D|d)epartment', negate = TRUE))
+```
+
+
+---
+
+# Separate the lines column
+
+Finally, we can use the `separate_wider_delim()` function to split the `lines` column using the vertical lines as separators.
+
+```{r}
+seperated_dat <- tibble(
+  lines = read_lines('employees.txt'),
+  department = str_extract(
+    lines, 'Department: (.+)', group = TRUE
+  ),
+  sub_department = str_extract(
+    lines, 'Sub-department: (.+)', group = TRUE
+  )
+) |> 
+  fill(department, sub_department) |> 
+  filter(str_detect(lines, '(D|d)epartment', negate = TRUE)) |> 
+  separate_wider_delim(
+    cols = lines,
+    delim = ' | ',
+    names = c('id', 'name', 'position', 'hire_date')
+  )
+seperated_dat
+```
+
+---
+
+# Get rid of extra words in column
+
+Once again, we can get rid of extra words like "Employee ID".
+This time, let us use `str_remove()` for that.
+We tell that function to look for either "Employee ID", "Name", "Position", or "Hire Date" followed by a colon and a white space.
+If `str_remove()` finds such a text, it will remove that for us.
+
+And ssince we have to do this for all columns from `id` to `hire_date`, we can iterate over each column.
+So, we use `across()` to apply `str_remove()` on all these columns.
+
+```{r}
+seperated_dat |> 
+  mutate(
+    across(
+      id:hire_date,
+      \(x) str_remove(
+        x,
+        '((Employee ID)|(Name)|(Position)|(Hire Date)): '
+      )
+    )
+  )
+```
+
+---
+
+# Use regex for separation
+
+Alternatively, we could have done the last two steps all in one go.
+For that, we could have used `separate_wider_regex()`:
+
+```{r}
+tibble(
+  lines = read_lines('employees.txt'),
+  department = str_extract(
+    lines, 'Department: (.+)', group = TRUE
+  ),
+  sub_department = str_extract(
+    lines, 'Sub-department: (.+)', group = TRUE
+  )
+) |> 
+  fill(department, sub_department) |> 
+  filter(str_detect(lines, '(D|d)epartment', negate = TRUE)) |> 
+  separate_wider_regex(
+    cols = lines,
+    patterns = c(
+      "Employee ID: ",
+      id = '.{4}', 
+      ' \\| Name: ',
+      name = '.+',
+      ' \\| Position: ',
+      position = '.+',
+      ' \\| Hire Date: ',
+      hire_date = '.+'
+    )
+  )
+```
+
+
+Either way, we have successfully transformed the shitty data format into nice tidy data set.
+As you've seen, text cleaning techniques are super useful.
+If you want to learn more about that, I'm currently prepping Part 3 of my Data Cleaning Master Class where we focus on text cleaning, regex and all the good stuff.
+
+
+
+
+
+
+
+

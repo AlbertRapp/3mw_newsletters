@@ -1,0 +1,581 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+    message: false
+    warning: false
+---
+
+```{r}
+setwd(here::here('91_Aug_28_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+```{r}
+library(tidyverse)
+setwd(here::here('91_Aug_28_2024'))
+tibble(
+  nmbr = c(
+    51, 42, 'NA', 'NULL', -9999
+  )
+) |> 
+  write_csv('data/csv_with_missing_nmbrs.csv')
+```
+
+
+# Dealing with missing numbers
+
+When you read in a `csv`-files, it can often happen that the rows in the file denote missing values with notations like `NA`, `NULL` or even `-9999`.
+In particular, the `NA` and `NULL` values will cause your vector to be loaded as a `character`. 
+
+```{r}
+#| results: hide
+library(tidyverse)
+read_csv(
+  'data/csv_with_missing_nmbrs.csv'
+)
+# A tibble: 5 × 1
+#   nmbr 
+#   <chr>       # <- encoded as characters
+# 1 51   
+# 2 42   
+# 3 NA   
+# 4 NULL 
+# 5 -9999
+```
+
+---
+
+This means that while the numbers look like they could do what numbers do, they can't.
+For example, even if you take only the first two rows with `slice()` you still cannot do calculations with the numbers.
+
+```{r}
+#| error: true
+read_csv(
+  'data/csv_with_missing_nmbrs.csv'
+) |> 
+  slice(1:2) |> 
+  mutate(
+    new_nmbr = nmbr + 2
+  )
+```
+
+---
+
+See?
+You will always get a error saying `"non-numeric argument to binary operator"`. 
+That's a tell-tale sign that something isn't encoded in the data format as you expect.
+
+But the good news is this:
+You can actually tell `read_csv()` what constitutes a missing value.
+With the `na` argument, you can specify a vector of strings that should be treated as `NA`.
+
+```{r}
+#| results: hide
+read_csv(
+  'data/csv_with_missing_nmbrs.csv',
+  na = c('NA', 'NULL', -9999)
+)
+# A tibble: 5 × 1
+#    nmbr
+#   <dbl>     # <- actually numbers
+# 1    51
+# 2    42
+# 3    NA     # <- actually NA
+# 4    NA     # <- actually NA
+# 5    NA     # <- actually NA
+```
+
+---
+
+So with that you can do the calculations you want.
+
+```{r}
+read_csv(
+  'data/csv_with_missing_nmbrs.csv',
+  na = c('NA', 'NULL', -9999)
+) |> 
+  mutate(
+    new_nmbr = nmbr + 2
+  )
+```
+
+
+This was just a tiny nugget from the many things I will teach you in the new 21 lessons of the data Cleaning Master Class.
+If you're ready to clean data faster & efficiently to get to your data insights faster, sign up for the course today 
+
+LINK
+
+(The 15%-off promo code *"PART2RELEASE"* is still available for 6 days)
+
+------
+
+# Dealing with missing numbers in Excel files
+
+
+
+```{r}
+tibble(
+  id = 1:5,
+  nmbr = c(
+    51, 42, 'NA', 'NULL', -9999
+  )
+) |> 
+  openxlsx::write.xlsx(
+    'data/missing_nmbrs.xlsx'
+  )
+```
+
+
+Yesterday, I've shown you how easy it can be to turn weird notations like `NA`, `NULL` or `-9999` into actual missing values when you read a `csv`-file.
+With Excel files, things work similar but a tiny bit different.
+Let's try to read an Excel file with the `{openxlsx}` package.
+
+```{r}
+openxlsx::read.xlsx('data/missing_nmbrs.xlsx')
+```
+
+
+Notice that this output doesn't show us the data formats.
+That's because this is a `data.frame` instead of a `tibble`.
+For a nicer output, it's convenient to make this into one.
+
+
+```{r}
+#| results: hide
+openxlsx::read.xlsx('data/missing_nmbrs.xlsx') |> 
+  as_tibble()
+# # A tibble: 5 × 2
+#      id nmbr    # <- nmbr encoded as characters
+#   <dbl> <chr>
+# 1     1 51   
+# 2     2 42   
+# 3     3 NA   
+# 4     4 NULL 
+# 5     5 -9999
+```
+
+
+So here, we can now see that things are once again treated like characters.
+Luckily for us, the `read.xlsx()` function has an argument called `na.strings` that works pretty much the same as the `na` argument from `read_csv()`.
+
+```{r}
+#| results: hide
+openxlsx::read.xlsx(
+  'data/missing_nmbrs.xlsx',
+  na.strings = c('NA', 'NULL', -9999),
+) |> 
+  as_tibble()
+# # A tibble: 5 × 2
+#      id nmbr 
+#   <dbl> <chr> # <- nmbr still encoded as characters
+# 1     1 51   
+# 2     2 42   
+# 3     3 NA    # <- actual NA  
+# 4     4 NA    # <- actual NA    
+# 5     5 NA    # <- actual NA  
+```
+
+This did half of the work for us.
+The output now correctly turns `NULL` and `-9999` into `NA` as well.
+But the column's data format?
+It's still `character`.
+
+Thus, we have to manually convert this from `character` to `double`.
+Here, we can do that with `parse_number()`.
+
+```{r}
+#| results: hide
+openxlsx::read.xlsx(
+  'data/missing_nmbrs.xlsx',
+  na.strings = c('NA', 'NULL', -9999),
+) |> 
+  as_tibble() |> 
+  mutate(
+    nmbr = parse_number(nmbr)
+  )
+# # A tibble: 5 × 2
+#      id nmbr 
+#   <dbl> <dbl> # <- finally a number
+# 1     1 51   
+# 2     2 42   
+# 3     3 NA    # <- actual NA  
+# 4     4 NA    # <- actual NA    
+# 5     5 NA    # <- actual NA  
+```
+
+For every data type (in particular datetimes) there are helpful functions like `parse_number()` to do the conversion for us.
+For dates & times, there's actually quite a few due to the variety of that format.
+If you're curious, you can level up your data cleaning skills and find out more in Part 2 of the course.
+
+----
+
+
+Cleaning dates & times can be painful. Or magical.
+
+Depends on whether you use the freakishly good helper functions from the Tidyverse. 
+
+
+```{r}
+#| eval: false
+ymd(
+  c(
+    '2024-08-03',
+    '2024, Aug 03',
+    '2024-August,03',
+    '2024/8/3',
+    '24/08/08'
+  )
+)
+# "2024-08-03" "2024-08-03" "2024-08-03" 
+# "2024-08-03" "2024-08-08"
+```
+
+There are a bunch of variations of `ymd` that handle even stupid formats
+
+```{r}
+dmy('23.06.2010')
+dmy('23rd of June 2010')
+dym('23rd, 2010 June') # Who does that!?!
+yq('2024 Q3')
+yq('2024 Q4')
+```
+
+Don't give too much info, though
+
+```{r}
+dmy('23.06.2010 7.42pm')
+dmy('23.06.2010 19:42')
+```
+
+In that case, `parse_date()` or `parse_datetime()` are your friends.
+
+```{r}
+parse_datetime(
+  '23.06.2010 19:42',
+  format = '%d.%m.%Y %H:%M'
+)
+parse_date(
+  '23.06.2010 19:42',
+  format = '%d.%m.%Y %H:%M'
+)
+```
+
+
+And if you're not sure about the format?
+`parse_date_time()` can do it all.
+
+```{r}
+parse_date_time(
+  c(
+    '23.06.2010 19:42', #dmy HM
+    '01.01.2010 19:42', #dmy HM
+    '23.06.2010',       #dmy
+    '23rd, 2010 June'   #dym
+  ),
+  orders = c('dmyHM', 'dmy', 'dym')
+)
+```
+
+
+And for those dumb Excel dates that are turned into numbers?
+Other R packages can help you.
+
+```{r}
+janitor::excel_numeric_to_date(
+  c(
+    44324,
+    43524,
+    45634,
+    25522
+  )
+)
+```
+
+----
+
+
+Combining data sets
+
+
+```{r}
+tibble(
+  id = 1:2,
+  value = c('a', 'b')
+) |> 
+  jsonlite::write_json('data/data.json')
+```
+
+
+Let's talk about combining data sets.
+Often, you will not get a data set that has all of the information you need.
+Instead, you will have to combine information from multiple sources to get the job done.
+
+For example, sometimes you might have to get data from some API from some internal or external web service.
+This is often the case when you want to use live data from some source (like stock prices or weather forecast).
+
+More often than not, you will receive a JSON-file from that.
+And if it's not a file it will still be in JSON format.
+Here's how that would look in R.
+
+```{r}
+jsonlite::read_json('data/data.json')
+```
+
+At the end of the day, you can think of a JSON-file as just a bunch of nested lists.
+To get an overview of the structure, it helps to take a look at `glimpse()`.
+
+```{r}
+jsonlite::read_json('data/data.json') |> 
+  glimpse()
+```
+
+In this case, it's just a list of lists of 2.
+And it seems like every inner list corresponds to one row.
+So, we can just combine the rows with `bind_rows()`
+
+```{r}
+json_data <- jsonlite::read_json('data/data.json') |> 
+  bind_rows()
+json_data
+```
+
+Now, assuming that you want to enrich your data, you want to get additional columns into your dataset.
+If you are certain that 
+
+- the first row in `json_data` corresponds to the first row in a second data set and 
+- you are sure the same is true for all the other rows, 
+
+then you can just stick the data sets side-by-side with `bind_cols()` which works very similiar to `bind_rows()`.
+
+```{r}
+second_tib <- tibble(predictions = c('c', 'd'))
+json_data |> 
+  bind_cols(second_tib)
+```
+
+
+But more often then not, you will have a second data sets where things are in a different order or there are simply much more extra information that you don't need.
+For example, here's a larger version of `second_tib`.
+
+```{r}
+second_tib <- tibble(
+  id = seq_along(letters),
+  predictions = letters
+)
+second_tib
+```
+
+It doesn't make much sense to stick `second_tib` next to our `json_data` because the amount of rows do not even match.
+Instead, we only want to grab the rows that have the `id`s we are interested in.
+That's where a join function like `left_join()` comes in.
+
+```{r}
+json_data |> 
+  left_join(second_tib, by = 'id')
+```
+
+And depending on the type of join you use, your output might look a slightly bit different.
+
+```{r}
+json_data |> 
+  right_join(second_tib, by = 'id')
+```
+
+----
+
+
+I used to think that JSON files are really hard to handle. But in a lot of cases, all you need to handle JSONs are three functions.
+
+First, you have to realize that JSONs in R are just nested lists.
+
+Then, you can just inspect the structure of your nested lists with glimpse().
+
+You might even realize that each sub-lists corresponds to a what would normally be a row if it were just a good old data.frame/tibble.
+
+In those cases, you can just make it into one with bind_rows().
+
+And if not? 
+
+Well, then you might have to drill down further into the nested structure with pluck() to get the specific parts that you need.
+
+
+```{r}
+jsonlite::read_json('data/data.json') |> 
+  glimpse()
+
+jsonlite::read_json('data/data.json') |> 
+  pluck(2, 'value')
+```
+
+----
+
+
+```{r}
+library(rvest)
+url_gdp <- 'https://www.statistikportal.de/de/ugrdl/ergebnisse/wirtschaft-und-bevoelkerung/bipbws'
+
+read_html(url_gdp) |> 
+  html_table(dec = ',') |> 
+  glimpse()
+
+html_tables <- read_html(url_gdp) |> 
+  html_table(dec = ',', header = FALSE)
+gdp_data <- html_tables[[2]] |> 
+  select(-(2:4)) |> 
+  janitor::row_to_names(row_number = 2) |> 
+  slice(-1)
+```
+
+
+```{r}
+gdp_data
+```
+
+
+```{r}
+converted_gdp_data <- gdp_data |> 
+  mutate(
+    across(
+      -Land,
+      \(x) parse_number(
+        x, 
+        # Adjust to way German numbers are written
+        locale = locale(
+          decimal_mark = ",",
+          grouping_mark = "."
+        )
+      )
+    )
+  )
+converted_gdp_data
+```
+
+
+```{r}
+converted_gdp_data |> 
+  pivot_longer(
+    -Land,
+    names_to = 'year',
+    values_to = 'gdp'
+  )
+```
+
+
+```{r}
+converted_gdp_data |> 
+  pivot_longer(
+    -Land,
+    names_to = 'year',
+    values_to = 'gdp'
+  ) |> 
+  summarise(
+    gpd = list(gdp),
+    .by = Land
+  )
+```
+
+
+
+```{r}
+rand_numbers_cells <- tidyxl::xlsx_cells(
+  'data/pivot_numbers.xlsx'
+)
+rand_numbers_cells
+```
+
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::rectify()
+```
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::behead(
+    'left-up',
+    name = 'country'
+  ) |> 
+  unpivotr::rectify()
+```
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::behead(
+    'left-up',
+    name = 'country'
+  ) 
+```
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::behead(
+    'left-up',
+    name = 'country'
+  ) |>
+  unpivotr::behead(
+    'left',
+    name = 'region'
+  ) |> 
+  unpivotr::rectify()
+```
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::behead(
+    'left-up',
+    name = 'country'
+  ) |> 
+  unpivotr::behead(
+    'left',
+    name = 'region'
+  ) 
+```
+
+
+```{r}
+rand_numbers_cells |> 
+  unpivotr::behead(
+    'left-up',
+    name = 'country'
+  ) |> 
+  unpivotr::behead(
+    'left',
+    name = 'region'
+  ) |> 
+  unpivotr::behead(
+    'up-left',
+    name = 'gender'
+  ) |> 
+  unpivotr::behead(
+    'up',
+    name = 'age'
+  ) |> 
+  select(country:age, numeric)
+```
+
+
+
+

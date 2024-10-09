@@ -1,0 +1,289 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+setwd(here::here('93_Sep_25_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+# Create an empty document
+
+```{r}
+library(officer)
+read_docx()
+```
+
+CODE
+
+---
+
+# Create a text
+
+```{r}
+current_day <- lubridate::now() |> format('%Y-%m-%d')
+current_time <- lubridate::now() |> format('%H:%M')
+text_creation_time <- ftext(
+  glue::glue('This file was created with R on {current_day} at {current_time}.')
+)
+text_creation_time
+```
+
+CODE
+
+---
+
+# Add a paragraph to our document
+
+Cool. 
+We got a text so let's add it to the body of our empty document.
+We can do that as part of a new paragraph via the `body_add_fpar()` function.
+
+But since this will add a paragraph and not just a single line of text, we have to wrap our text into a paragraph.
+We do that with the `fpar()` function.
+
+```{r}
+par_creation_time <- fpar(text_creation_time)
+read_docx() |> 
+  body_add_fpar(par_creation_time)
+```
+
+CODE
+
+---
+
+# Print to a docx file
+
+```{r}
+read_docx() |> 
+  body_add_fpar(par_creation_time) |> 
+  print(target = '00_my_beautiful_word_file.docx')
+```
+
+CODE
+
+---
+
+# Add pargraph styling
+
+Nice!
+That worked pretty smoothly.
+But it also looks boring as hell.
+Let's try to add some style to this.
+We can modify 
+
+- the text properties of the text inside the paragraph via `fp_text()` and
+- the paragraph properties via `fp_par()`.
+
+```{r}
+par_creation_time <- fpar(
+  text_creation_time,
+  fp_t = fp_text(
+    color = "dodgerblue4",
+    font.size = 14
+  ),
+  fp_p = fp_par(
+    border.top = fp_border(color = 'dodgerblue4', width = 2),
+    text.align = 'right'
+  )
+)
+```
+
+CODE
+
+And then we just have to re-execute the printing command from before to get this result.
+
+```{r}
+read_docx() |> 
+  body_add_fpar(par_creation_time) |> 
+  print(target = '01_my_beautiful_word_file.docx')
+```
+
+IMAGE
+
+---
+
+
+# Changing text properties
+
+Well, it looks like the paragraph styling changed nicely but the text styling didn't take any effect.
+This can happen if there are some other default values set for the texts.
+The way to avoid that?
+Specify the properties inside of `ftext()`.
+
+```{r}
+# Specify reusable style variable
+prop_blue_text <- fp_text(
+  color = "dodgerblue4",
+  font.size = 14,
+  bold = TRUE
+)
+# Set prop of ftext()
+text_creation_time <- ftext(
+  glue::glue('This file was created with R on {current_day} at {current_time}.'),
+  prop = prop_blue_text
+)
+
+# Rerun old code
+par_creation_time <- fpar(
+  text_creation_time,
+  fp_p = fp_par(
+    border.top = fp_border(color = 'dodgerblue4', width = 2),
+    text.align = 'right'
+  )
+)
+read_docx() |> 
+  body_add_fpar(par_creation_time) |> 
+  print(target = '02_my_beautiful_word_file.docx')
+```
+
+CODE
+
+IMAGE
+
+---
+
+# Assemble paragraphs using differently formatted text
+
+But you don't have to use the same style on all of the text.
+You could change the words of single text.
+For that, all you have to do is use separate `ftext()` calls inside of `fpar()`.
+
+```{r}
+par_creation_time <- fpar(
+  ftext('This file was created with R on '),
+  ftext(current_day, prop = prop_blue_text),
+  ftext(' at '),
+  ftext(current_time, prop = prop_blue_text),
+  ftext('.'),
+  fp_p = fp_par(
+    border.top = fp_border(color = 'dodgerblue4', width = 2),
+    text.align = 'right'
+  )
+)
+```
+
+CODE
+
+And then if you rerun the printing code, you will see that only the included variables are formatted blue.
+
+```{r}
+read_docx() |> 
+  body_add_fpar(par_creation_time) |> 
+  print(target = '03_my_beautiful_word_file.docx')
+```
+
+CODE
+
+IMAGE
+
+---
+
+# Add tables
+
+Now what we could to is to add another paragraph with some text followed by a table.
+The paragraph could once again be added via `body_add_fpar()` but for the table, we will have to use `body_add_table()`.
+This function expects a `data.frame`/`tibble` that should be converted to a table.
+
+
+```{r}
+read_docx() |> 
+  body_add_fpar(par_creation_time) |>
+  body_add_fpar(
+    fpar(
+      ftext(
+        'And now we will add a table of the famous iris data set in here (but only the first 10 rows.)'
+      ),
+      fp_p = fp_par(padding.bottom = 20, padding.top = 20)
+    )
+  ) |> 
+  body_add_table(head(iris), style = "table_template") |> 
+  print(target = '04_my_beautiful_word_file.docx')
+```
+
+CODE
+
+And if you don't like the style of the table, know that you can add any flextable you like.
+For that, you only need to make a flextable out of your data set and include that via `body_add_flextable()`.
+
+```{r}
+#| message: false
+#| warning: false
+library(flextable)
+tbl <- flextable(head(iris)) |> autofit()
+
+doc_with_flextable <- read_docx() |> 
+  body_add_fpar(par_creation_time) |>
+  body_add_fpar(
+    fpar(
+      ftext(
+        'And now we will add a table of the famous iris data set in here (but only the first 10 rows.)'
+      ),
+      fp_p = fp_par(padding.bottom = 20, padding.top = 20)
+    )
+  ) |> 
+  body_add_flextable(tbl)
+doc_with_flextable |> 
+  print(target = '05_my_beautiful_word_file.docx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Add a ggplot 
+
+And to top it all off, you can add a ggplot to your word document as well.
+For that you will need a `ggplot` of course.
+But more importantly, you will need a `body_add_gg()` call.
+
+```{r}
+library(ggplot2)
+gg_penguins <- palmerpenguins::penguins |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm, fill = species)) +
+  geom_point(shape = 21, col = 'black', size = 5, alpha = 0.8) +
+  theme_minimal()
+
+
+doc_with_flextable |> 
+  body_add_fpar(
+    fpar(
+      ftext('But who cares about iris anymore? The penguins are much cooler.'),
+      fp_p = fp_par(padding.bottom = 20, padding.top = 20)
+    )
+  ) |> 
+  body_add_gg(
+    gg_penguins,
+    width = 6,
+    height = 6 * 9 / 16 # 16:9 aspect ration
+  ) |> 
+  print(target = '06_my_beautiful_word_file.docx')
+```
+
+
+CODE
+
+IMAGE
+
+

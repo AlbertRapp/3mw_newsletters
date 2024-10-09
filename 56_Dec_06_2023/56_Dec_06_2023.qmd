@@ -28,6 +28,18 @@ shinyApp(ui, server)
 ```
 
 
+```{r}
+#| eval: false
+server <- function(input, output, session) {
+  output$text_output <- renderText({
+    paste(
+      input$numeric_input,
+      input$text_input
+    )
+  })
+}
+```
+
 
 ```{python}
 #| eval: false
@@ -75,7 +87,7 @@ run_app(app) # start the app
 
 ```{python}
 #| eval: false
-from shiny import  App, ui, run_app
+from shiny import  App, ui, run_app, render
 
 app_ui = ui.page_fluid(
     ui.layout_sidebar(
@@ -101,7 +113,10 @@ app_ui = ui.page_fluid(
 )
 
 def server(input, output, session):
-    ... # Server logic here
+  @output
+  @render.text
+  def text_output():
+    return input.text_input() + ' ' + str(input.numeric_input())
 
 app = App(app_ui, server)
 run_app(app) # start the app

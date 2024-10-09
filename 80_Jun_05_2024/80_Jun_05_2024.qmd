@@ -1,0 +1,126 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('80_Jun_05_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+Today, we're doing a little intermezzo before we move on to talk more about Shiny modules.
+Instead, I'm going to show you my favorite RStudio settings and shortcuts.
+This should help you be more productive when using RStudio.
+Whether you're into Shiny or not.
+And if you want to see detailed explanations, you can check out my video.
+
+INSERT VIDEO HERE
+
+------------------------------------------------------------------------
+
+# The perfect RStudio theme
+
+One question that I get asked a lot on YouTube is: "How do you make your RStudio look like that?" And in case you're wondering: Here's how my code typically looks:
+
+```{r}
+library(tidyverse)
+palmerpenguins::penguins |> 
+  filter(!is.na(sex)) |> 
+  summarise(
+    bill_length =  mean(bill_length_mm),
+    bill_depth = mean(bill_depth_mm),
+    flipper_length = mean(flipper_length_mm),
+    body_mass = mean(body_mass_g),
+      .by = species
+  )
+```
+
+![](images/clipboard-730673787.png)
+
+You see, what I do in my RStudio is that I - use a dark theme (which I feel are nicer for my eyes), - show indentations via rainbow parentheses and rainbow indentations (to improve code legibility), and - I've increased the font size for more comfortable reading.
+
+Originally, I did the latter thing because otherwise people cannot read a thing in my YT videos.
+But then I realized that this is surprisingly comfortable.
+So I suggest you try this out too.
+All of these settings can be found via the `Tools > Global Options` menu (more details in the above video).
+
+------------------------------------------------------------------------
+
+## Layout
+
+Another thing that I strongly recommend is arranging the panes differently.
+I've set up RStudio such that it shows my file on the left and my console on the right.
+You can find that option in `Tools > Global Options > Pane Layout`.
+
+![](images/clipboard-1101728806.png)
+
+The reason why I think that is because I believe the console is much more valuable while coding than the environment window (that shows your variables).
+That way, I can minimize everyhing but my file window and console and I have a roughly 50-50 screen split with the two most important windows.
+
+------------------------------------------------------------------------
+
+# Disable auto-save
+
+For some reason, RStudio has this default setting that saves variables from your session automatically.
+Consequently, if you restart RStudio these variables are auto-loaded.
+While this sounds nice in the beginning, I do believe that it sets you up for more pain in the future (like wondering why your code isn't doing as expected because you unknowingly used some variable name from a previous session).
+
+Thus, I always turn off this feature and I can be sure that every RStudio session starts with a clean slate.
+And you can do that too via `Tools > Global Options`.
+
+![](images/clipboard-2333571328.png)
+
+------------------------------------------------------------------------
+
+# Coding Shortkeys
+
+Next, let us talk about shortkeys.
+It is surprising how much faster you can become when you just know a couple of them.
+Let's start with a couple of basic coding shortkeys (You can find more in the video.)
+
+-   Use `Ctrl + Shift + M` to create a pipe (`|>`) without typing special characters
+-   Use `Ctrl + Enter` to execute separate lines
+-   Use `Ctrl + Shift + Enter` to execute an entire file
+-   Select a specific part of the code and use `Ctrl + Enter` to execute only the selected portion (useful for debugging pipe chains step by step)
+-   Open a function's documentation on the fly by clicking on the function name in your code and pressing `F1`
+
+------------------------------------------------------------------------
+
+# Navigation and search shortkeys
+
+The amount of effort to switch between windows or looking for files can compile quite quickly.
+So, in order to not lose time with these tedious activities, I present you with my favorite shortcuts in thesesituations:
+
+-   Use `Ctrl + 1` and `Ctrl + 2` to switch between the console and the current script window (eliminates the need to use the mouse for navigation)
+-   Use `Ctrl + .` to search for files AND functions
+-   Use `Ctrl + F` to search for and replace specific text within the **currently opened** file
+-   Use `Ctrl + Shift + F` to search for text within **all files** in the current project
+
+------------------------------------------------------------------------
+
+# The catch-all shortkey
+
+And finally if you have trouble remembering any of these shortkeys, there's a trick for that too.
+You see, you can execute all of these things via the command palette too.
+All you have to do is to remember **one** shortkey.
+And that is `Ctrl + Shift + P` (P as in palette).
+
+![](images/clipboard-2707023137.png)
+
+With this command palette you can start actions using text commands instead of using shortkeys.

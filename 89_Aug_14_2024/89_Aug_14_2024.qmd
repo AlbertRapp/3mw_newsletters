@@ -1,0 +1,312 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+```{r}
+setwd(here::here('89_Aug_14_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+
+## Fake data
+
+Let's first create a dummy data set using one of `{gt}`'s built-in data sets (`{gt}` has a lot of those)
+
+```{r}
+#| warning: false
+#| message: false
+library(tidyverse)
+library(reactable)
+hawaiian_sales <- gt::pizzaplace |> 
+  filter(name == 'hawaiian') |> 
+  mutate(
+    month = month(
+      date, label = TRUE, abbr = FALSE,
+      locale = 'en_US.UTF-8' # English month names
+    ),
+    quarter = paste0('Q', quarter(date))
+  ) |> 
+  summarise(
+    sales = n(),
+    revenue = sum(price),
+    .by = c(month, quarter)
+  )
+hawaiian_sales
+```
+
+
+## Base Layer
+
+```{r}
+reactable(hawaiian_sales)
+```
+
+TABLE
+
+The nice thing is that this is interactive out of the box.
+By clicking onto the column names, you can sort the rows.
+
+GIF
+
+---
+
+## Use better column names
+
+Unlike `{gt}`, the `{reactable}` package doesn't allow to change the table step my step by chaining pipes.
+Instead, you will have to use one of the many arguments of `reactable()` and helper functions to get things done.
+For example, to set nicer column names you can use the `columns` argument with a list of column definitions (using the `colDef()` helper)
+
+```{r}
+reactable(
+  hawaiian_sales,
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(name = 'Month'),
+    sales = colDef(name = 'Sales'),
+    revenue = colDef(name = 'Revenue')
+  )
+)
+```
+
+TABLE
+
+---
+
+## Title & Subtitle
+
+For adding a nice title and subtitle to your plot, you can either use some custom HTML & CSS tricks or you just use the `{reactablefmtr}` package.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(name = 'Month'),
+    sales = colDef(name = 'Sales'),
+    revenue = colDef(name = 'Revenue')
+  )
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+TABLE
+
+---
+
+## Format numbers
+
+The numbers in the revenue column correspond to dollar amounts. We can format them by specifying a column format inside of `colDef()` with help from the `colFormat()` helper function.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(name = 'Month'),
+    sales = colDef(name = 'Sales'),
+    revenue = colDef(
+      name = 'Revenue',
+      format = colFormat(currency = 'USD')
+    )
+  )
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+TABLE
+
+---
+
+## Add groups
+
+Now, I want to structure my tables into quarters. The easiest way to do that is to use the quarter column in our data set for grouping.
+The cool thing about `{reactable}` is that it's really easy and the output becomes nicely interactive out of the box.
+All you have to do is set the `groupBy` argument.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  groupBy = 'quarter',
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(name = 'Month'),
+    sales = colDef(name = 'Sales'),
+    revenue = colDef(
+      name = 'Revenue',
+      format = colFormat(currency = 'USD')
+    )
+  )
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+GIF
+
+---
+
+## Add summaries
+
+You can add group summaries by using the `aggregate` argument inside of `colDef()` and setting it to one of the built-in aggregate functions like `"mean"` or `"sum"`.
+If you want to do something custom, you can do that, but then you will have to write a custom JavaScript function for that.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  groupBy = 'quarter',
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(name = 'Month'),
+    sales = colDef(
+      name = 'Sales',
+      aggregate = 'sum'
+    ),
+    revenue = colDef(
+      name = 'Revenue',
+      format = colFormat(currency = 'USD'),
+      aggregate = 'sum'
+    )
+  )
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+TABLE
+
+---
+
+## Make table searchable
+
+If we wanted to make our table more interactive, we could make the `month` column filterable.
+That way, we can look for particular columns.
+In that case, it probably makes sense to have the groups unfolded by default.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  groupBy = 'quarter',
+  defaultExpanded = TRUE, # Expand rows by default
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(
+      name = 'Month',
+      filterable = TRUE  # Make column filterable
+    ),
+    sales = colDef(
+      name = 'Sales',
+      aggregate = 'sum'
+    ),
+    revenue = colDef(
+      name = 'Revenue',
+      format = colFormat(currency = 'USD'),
+      aggregate = 'sum'
+    )
+  )
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+GIF
+
+---
+
+## Change row styling
+
+Finally, to add a little bit more style and visual structure let us make the group rows blue.
+For that, we need to write a JavaScript function that takes the `rowInfo` object as an argument and returns a JSON object with camelCased style properties.
+
+```{r}
+reactable(
+  hawaiian_sales,
+  groupBy = 'quarter',
+  defaultExpanded = TRUE, # Expand rows by default
+  columns = list(
+    quarter = colDef(name = 'Quarter'),
+    month = colDef(
+      name = 'Month',
+      filterable = TRUE  # Make column filterable
+    ),
+    sales = colDef(
+      name = 'Sales',
+      aggregate = 'sum'
+    ),
+    revenue = colDef(
+      name = 'Revenue',
+      format = colFormat(currency = 'USD'),
+      aggregate = 'sum'
+    )
+  ),
+   rowStyle = JS(
+    "function(rowInfo) {
+      if (rowInfo.level == 0) { // corresponds to row group
+        return { 
+          background: '#E7EDF3', 
+          borderLeft: '2px solid #104E8B' 
+        }
+      } 
+    }"
+  ),
+) |> 
+  reactablefmtr::add_title(
+    title = 'Hawaiian Pizza Sales in 2015'
+  ) |> 
+  reactablefmtr::add_subtitle(
+    subtitle = 'Based on the fake pizzaplace data from `{gt}`',
+    font_weight = 'normal'
+  )
+```
+
+TABLE
+
+
+
+
+
+

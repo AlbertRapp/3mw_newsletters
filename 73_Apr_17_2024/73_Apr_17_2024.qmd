@@ -1,0 +1,132 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+---
+
+Last week we talked about creating static files instead of using a shiny app.
+ The advantage of that is that it's much easier to host these things.
+ But of course, this still leaves the question of how to do that.
+ And that's exactly what we're going to do today.
+
+
+So in principle, let's talk about:
+
+- How to host static files like HTML files with Netlify
+- How to make your life even easier with Quarto using the inbuilt integrations
+- How to host your static files under a custom domain like my private "albert-rapp.de" domain
+
+---
+
+# Creating an Account at Netlify
+
+Let's start out with creating an account at [Netlify](https://www.netlify.com/).
+It's free to use and unless you have a lot of traffic, you don't actually have to pay anything (unless you get a whole lot of traffic or want to use premium features).
+
+SCREENSHOT
+
+Alternatively, you can also use something like [GitHub Pages](https://pages.github.com/), it's very similar to set up and use.
+Here I'm just opting to show you Netlify because this is what I use.
+
+---
+
+# Adding a New Site
+
+Once you've registered and logged in, you can add a new site on the overview page.
+
+SCREENSHOT
+
+If you already have the static files, then you would just go on to deploy manually and then just drag and drop all of the HTML files into the window that comes after that.
+It's as easy as that to serve your files anywhere.
+
+SCREENSHOT
+
+If you had a Quarto blog, like the one you could easily create using one of [my most popular tutorials](https://albert-rapp.de/posts/13_quarto_blog_writing_guide/13_quarto_blog_writing_guide.html), then you could take the rendered output directory `_site` and just drop it in there.
+
+Once you do that, you will get assigned a URL and it will show "publish deploy".
+You could click on "Open production deploy" and it will show you your website.
+
+SCREENSHOT
+
+Right now, this shows you all of your content via a random URL that Netlify generates for you.
+
+SCREENSHOW
+
+---
+
+# Using the Inbuilt Quarto Integration for Quarto projects
+
+This drag-and-drop is great for one of approaches.
+But for a bigger project like my blog, I don't take the `_site` directory and manually drag and drop it to Netlify.
+Instead, I use the inbuilt integration from Quarto.
+To do so, inside of the RStudio project for my Quarto blog, I just have to type into the console `quarto publish`.
+
+SCREENSHOT
+
+The dialogues that follow are pretty straight-forward.
+You just have to click through all of them and then everything will be published for you automatically.
+That's basically the same thing as the manual steps we've just done but all started from within the console.
+
+---
+
+# Using a Custom URL
+
+Right now our project is available through a cryptic link that ends in "netlify.app".
+If I wanted to have it available under a different URL, what I need to do is to go on to "Domain management", click on "Add a domain", and insert the domain that I want to use.
+
+SCREENSHOT
+
+In this case, I could just call this `quarto-test.albert-rapp.de`.
+This is a subdomain of a domain that I own.
+(Obviously ownership of a domain like that is a prerequisite)
+
+
+Netlify would ask me to add this, but in order for this to work, I need to set up my DNS.
+This sounds very technical, but really all you have to know is that this tells anyone that accesses your URL to redirect to that Netlify website (without actually showing users that original cryptic url)
+It's basically a rerouting, an alias, if you will.
+
+---
+
+# Ways to set up DNS
+
+There are three ways to do DNS: 
+
+- A record, 
+- AAAA record, and 
+- CNAME.
+
+There are technical nuances, but in principle, the purpose of that is to do this rerouting.
+They just differ in the way they set up this rerouting.
+Netlify uses CNAME and when you add you subdomain Netlify tells you what CNAME you need to set in your subdomain:
+
+SCREENSHOT
+
+This means that you just have to go to wherever you've bought your domain, stick that into the DNS CNAME settings of that subdomain, and then you will just have to wait maybe a couple of minutes to hours until the changes all go through.
+This is how it would look at the domain provider I use:
+
+SCREENSHOT
+
+---
+
+# Enabling HTTPS
+
+Once you have done that, within the HTTPS section, you can enable the automatic generation of encryption certificates.
+This way, Netlify will take care of all the security for you so that users can just go to your website and don't get a warning from their browser that this only uses HTTP and not HTTPS.
+
+SCREENSHOT
+
+And don't worry if the certificate generation doesn't immediately work.
+It can take a while until the DNS changes go through.
+So if you've set up everything like I've described.
+Maybe you just have to wait a few hours and then try again.
+
+
+Once all of that is done, you have set up a place where you can host all of your static websites that you generate with Quarto or some other tool, and they are all accessible through that domain.
+
