@@ -1,0 +1,398 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+setwd(here::here('95_Oct_09_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+
+Today, I'm showing you how to create a data-driven slide deck using R and Powerpoint.
+
+---
+
+# Prepare powerpoint template
+
+First, we have to find a Powerpoint template that we want to use.
+You can either use my template or use one of your own.
+If you use your own, here's a bit of prep work that you have to do with it:
+
+- Open the pptx-file with Powerpoint and switch to the slide master ( On the "View" tab, select "Slide Master")
+
+- Throw out unnecessary layouts
+
+- Rename the placeholders: Powerpoint will just name all of the placeholders "Textbox 1", "Content 2", etc. 
+Do yourself a favor and rename those suckers into something you'll recognize when you see it in R. 
+You can use the alt + F10 shortkey to rename the all the IDs.
+
+- Delete all regular slides (outside of the slide master) and save your modified template
+
+---
+
+# Read pptx file
+
+Next, we can load the `{officer}` package and read our template file.
+
+```{r}
+#| message: false
+#| warning: false
+library(officer)
+pptx_template <- read_pptx('slide_template.pptx')
+pptx_template
+```
+
+CODE
+
+Notice how this shows you all of the available layouts of the file.
+These were the things you were modifying in the slide master.
+As you can see, I've modified the "SlateVTI" master template that office gave me so that it has only two different layouts.
+
+---
+
+# Add a slide
+
+Alight, let's add a slide to our pptx document.
+To do so, we just have to pass our document to the `add_slide()` function.
+There, we specify the layout and master template of the new slide.
+
+
+```{r}
+# This adds a new slide without having to save it
+pptx_template |> 
+  add_slide(
+    layout = 'Title-Slide', 
+    master = 'SlateVTI'
+  )
+```
+
+CODE
+
+Afterwards, we can have a look at our slide content.
+
+```{r}
+pptx_template |> 
+  slide_summary(index = 1) |> 
+  as_tibble() 
+```
+
+CODE
+
+Wow. 
+Shocking. 
+There's nothing in that slide. 
+But we now that there is a layout defined for that slide.
+You can see that with the `layout_properties()` function.
+
+```{r}
+pptx_template |> 
+  layout_properties() |> 
+  as_tibble()
+```
+
+CODE
+
+Shoot!
+This shows ALL available layouts and the corresponding placeholders.
+Let's filter this for the layout we're currently interested in.
+And then we can focus on the labels that layout has.
+
+```{r}
+pptx_template |> 
+  layout_properties(layout =  'Title-Slide') |> 
+  as_tibble() |> 
+  select(id, ph_label)
+```
+
+CODE
+
+---
+
+# Fill placeholders
+
+Alright cool.
+Let's insert texts where the placeholders `Title-Text` and `Subtitle-Text` are located.
+We can do that with the `ph_with()` function.
+
+This function takes two arguments:
+
+- the `"value"` argument: 
+That can be a text, a data.frame, a flextable, a ggplot, you name it.
+
+- the `"location"` argument: 
+This is the place where to insert your content, duh. 
+But you have to specify it using the `ph_location_label()` function in which you can use the IDs you've just seen.
+
+```{r}
+#| error: true
+pptx_template |> 
+  ph_with(
+    value = 'Creating Slide Decks With R',
+    location = ph_location_label('Title-Text')
+  ) |> 
+   ph_with(
+    value = 'A short demo',
+    location = ph_location_label('Subtitle-Text')
+  )
+```
+
+
+Oh no!
+`{officer}` seems to be unable to find the placeholders.
+Maybe, we have to explicitly tell it on what slide we're currently on.
+We can to that with `on_slide()`.
+
+```{r}
+pptx_template |> 
+  on_slide(1) |> 
+  ph_with(
+    value = 'Creating Slide Decks With R',
+    location = ph_location_label('Title-Text')
+  ) |> 
+   ph_with(
+    value = 'A short demo',
+    location = ph_location_label('Subtitle-Text')
+  )
+```
+
+CODE
+
+Nice.
+This worked perfectly.
+Well, maybe "perfectly" is a stretch at this point.
+Let's just say that we didn't get an error and that's nice.
+
+---
+
+# Save document
+
+So let's throw this into an actual `pptx`-file and see what's what.
+If you've paid attention during the last couple of newsletter editions, then you know what to do.
+
+
+```{r}
+pptx_template |> 
+  print('00_title_filled.pptx')
+```
+
+IMG
+
+---
+
+# Preparing another slide
+
+Beautiful.
+Let's add another slide.
+For that we can follow the same procedure.
+Let's first add another slide.
+
+```{r}
+pptx_template |> 
+  add_slide(
+    layout = 'Title and Content',
+    master = 'SlateVTI'
+  ) 
+```
+
+CODE
+
+Then, we can once again checkout what placeholders we have on this slide.
+
+```{r}
+pptx_template |> 
+  layout_properties(layout =  'Title and Content') |> 
+  as_tibble() |> 
+  select(id, ph_label)
+```
+
+CODE
+
+
+Let's start with the basics. Let's fill `date`, `footnote`, `title` and `slide_nmbr`.
+
+```{r}
+pptx_template |> 
+  on_slide(2) |> 
+  ph_with(
+    value = 'Add data-driven content like tables...',
+    location = ph_location_label('title')
+  ) |> 
+  ph_with(
+    value = lubridate::now() |> format('%b %d, %Y'),
+    location = ph_location_label('date')
+  ) |> 
+  ph_with(
+    value = 'Creating slides with R',
+    location = ph_location_label('footnote')
+  ) |> 
+  ph_with(
+    value = '1',
+    location = ph_location_label('slide_nmbr')
+  ) 
+```
+
+CODE
+
+Let's check out intermediate result.
+
+
+```{r}
+pptx_template |> print('01_intermediate.pptx')
+```
+
+IMG
+
+---
+
+## Adding flextables
+
+Next, we can fill the remaining placeholder with a table.
+And as we've already learned, the `{flextable}` package works wonderfully with the `{officer}` package.
+So let's create a flextable.
+(Don't worry too much about the code if you haven't worked with `{flextable}` before.)
+
+```{r}
+#| warning: false
+#| message: false
+library(flextable)
+summaries <- palmerpenguins::penguins |> 
+  summarize(
+    mean_bill_length_mm = mean(bill_length_mm, na.rm = T),
+    mean_bill_depth_mm = mean(bill_depth_mm, na.rm = T),
+    mean_body_mass_g = mean(body_mass_g, na.rm = T),
+    .by = species
+  ) 
+ft <- summaries |> 
+  flextable() |> 
+  flextable::colformat_double(digits = 2) |> 
+  bg(bg = 'white', part = 'all') |> 
+   bg(
+     j = 'mean_body_mass_g', 
+     bg = scales::col_numeric(
+       palette = c("wheat", "firebrick"), 
+       domain = range(summaries$mean_body_mass_g),
+       n = 3 
+    )
+  ) |> 
+  font(fontname = 'Source Sans Pro', part = 'all') |> 
+  fontsize(size = 14, part = 'all') |> 
+  bold(part = 'header') |> 
+  line_spacing(space = 2, part = 'all') |> 
+  autofit()
+ft
+```
+
+CODE
+
+IMG
+
+Then, we can put the table into the remaining placeholder and print the document into a file.
+Works just like last time.
+
+```{r}
+pptx_template |> 
+  on_slide(2) |> 
+  ph_with(
+    value = ft,
+    location = ph_location_label('content_placeholder')
+  ) |> 
+  print('02_table.pptx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Add a ggplot
+
+By now, you probably get the idea.
+Still, let's do one more example.
+You know, because no newsletter is complete without a ggplot.
+So first, we replicate all steps from before to create a new slide.
+
+
+```{r}
+pptx_template  |> 
+  add_slide(
+    layout = 'Title and Content',
+    master = 'SlateVTI'
+  )  |> 
+  on_slide(3) |> 
+  ph_with(
+    value = '... or ggplots',
+    location = ph_location_label('title')
+  ) |> 
+  ph_with(
+    value = lubridate::now() |> format('%b %d, %Y'),
+    location = ph_location_label('date')
+  ) |> 
+  ph_with(
+    value = 'Creating slides with R',
+    location = ph_location_label('footnote')
+  ) |> 
+  ph_with(
+    value = '2',
+    location = ph_location_label('slide_nmbr')
+  ) 
+```
+
+CODE
+
+And then we can generate a ggplot and stick that into the slides just like with the flextable.
+
+```{r}
+gg_plt <- palmerpenguins::penguins |> 
+  ggplot(aes(flipper_length_mm, bill_length_mm)) +
+  geom_point(
+    aes(fill = species), 
+    size = 3, 
+    shape = 21, 
+    col = 'black',
+    alpha = 0.9
+  ) +
+  theme(plot.background = element_rect(fill = 'white'))
+
+pptx_template |> 
+  on_slide(3) |> 
+  ph_with(
+    value = gg_plt,
+    location = ph_location_label('content_placeholder')
+  ) |> 
+  print('03_ggplot.pptx')
+```
+
+
+CODE
+
+IMG
+
+
+
+
+
+
+
+
+
+
