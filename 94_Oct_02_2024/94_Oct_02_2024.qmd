@@ -1,0 +1,380 @@
+---
+theme: ../theme.scss
+format: 
+  html: 
+    fig-height: 5
+    fig-dpi: 300
+    fig-width: 8.88
+    fig-align: center
+knitr: 
+  opts_chunk: 
+    collapse: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+setwd(here::here('94_Oct_02_2024'))
+library(tidyverse)
+
+theme_set(
+  theme_minimal(
+    base_size = 16,
+    base_family = 'Source Sans Pro'
+  ) +
+    theme(panel.grid.minor = element_blank())
+) 
+```
+
+Last week, I told you about the `{officer}` package that let's you build a Word document from scratch using R.
+But that was a bit much wasn't it?
+Clearly, no one wants to create a WHOLE Word document from R.
+It's much easier to use Word to create a document template and then use the `{officer}` package to insert data-related things.
+So today, I'm showing you how to do that.
+
+---
+
+# Find a template
+
+First, let us download a template that we want to use.
+The cool thing about the `{officer}` package is that the look of the template doesn't matter.
+We can even use one that uses fancy visual elements and styles.
+Like this one here:
+
+IMG
+
+---
+
+# Insert placeholder
+
+Now that we have that template, we can modify it to our needs.
+For example, I want to show you how to create this Word document from the template:
+
+FINAL IMG
+
+So, a couple of quick modifications here and there and ready is our template:
+
+TEMPLATE IMG
+
+---
+
+# Insert a date
+
+As you can see, our template contains a few placeholders like "[DATE]".
+These can be replaced using functions from the `{officer}` package.
+The key function to replace text is `body_replace_all_text()`.
+
+This function works by looking for a specific string and then replacing it with something else.
+Let's try that with the "[DATE]" string.
+
+```{r}
+#| warning: false
+#| message: false
+library(officer)
+doc_template <- read_docx('word_templates/letter.docx') 
+doc_template |> 
+  body_replace_all_text(
+    old_value = '[DATE]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  print(target = '00_date_replacement.docx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Watch out! Regular expressions
+
+Oh no.
+This doesn't look right.
+Something weird is going on.
+And the weirdness has a name: It's regular expressions.
+
+You see, the thing that we stick into the `old_value` argument is a regular expression.
+This means it uses a complex but powerful language to describe patterns (btw, my [data cleaning masterclass](https://data-cleaning.albert-rapp.de/) teaches that powerful language.) 
+
+In this language the brackets `[` and `]` have a special meaning.
+And that meaning is what destroys our text replacement.
+But we can tell that regular expression to use the brackets as is using `\\`.
+That way, we get our desired result.
+
+```{r}
+doc_template <- read_docx('word_templates/letter.docx') 
+doc_template |> 
+  body_replace_all_text(
+    old_value = '\\[DATE\\]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  print(target = '01_date_replacement_regex.docx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Insert an image
+
+
+Nice! 
+This worked pretty well.
+Now let's try something harder.
+Let's insert a company logo.
+
+For that I have created a generic logo.
+It looks like this:
+
+IMG
+
+Unfortunately, there is no function to replace a text with an image.
+There is only `body_add_img()`.
+
+So in order to replace the "[COMPANY_LOGO]" placeholder with an image, we have to do three things:
+
+1. Navigate a fictitious cursor to the position of the paragraph that contains "COMPANY_LOGO"
+
+2. Remove the paragraph (as it only contains the placeholder)
+
+3. Add the image into that paragraph
+
+And for all three of thoses steps there are three functions that do exactly that.
+
+```{r}
+doc_template <- read_docx('word_templates/letter.docx') 
+doc_template |> 
+  cursor_reach('COMPANY_LOGO') |> 
+  body_remove() |> 
+  body_add_img(
+    src = 'company_logo.png',
+    width = 0.75 * 1201 / 376,
+    height = 0.75,
+    pos = 'before' # placement relative to cursor pos
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[DATE\\]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  print(target = '02_img_replacement.docx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Right-align the image
+
+Unfortunately, this doesn't look nice.
+We want to have our image right-aligned.
+That's why we have to make sure that the image is inserted in a right-aligned paragraph.
+
+This can be done via the `style` argument in `body_add_img()`.
+But this argument requires the name of a pre-defined style.
+Hence, we have to define such a style using `docx_set_paragraph_style()` and the `fp_par()` function from last time.
+
+```{r}
+doc_template <- read_docx('word_templates/letter.docx') 
+
+# Add style to document
+doc_template <- doc_template |> 
+  docx_set_paragraph_style(
+    style_id = 'right-aligned-img',
+    style_name = 'Right aligned Image',
+    fp_p = fp_par(text.align = 'right')
+  )
+
+doc_template |> 
+  cursor_reach('COMPANY_LOGO') |> 
+  body_remove() |> 
+  body_add_img(
+    src = 'company_logo.png',
+    width = 0.75 * 1201 / 376,
+    height = 0.75,
+    style = 'Right aligned Image', # Use here
+    pos = 'before'
+  ) |> 
+  officer::body_replace_all_text(
+    old_value = '\\[DATE\\]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  print(target = '03_img_replacement_right_aligned.docx')
+```
+
+CODE
+
+And with that, we do have a nice right-aligned company logo.
+
+IMG
+
+---
+
+# Insert line breaks
+
+Unfortunately, our date seems to have been moved by that.
+No problem.
+We just have to define the image paragraph style to have more padding at the bottom.
+
+
+```{r}
+doc_template <- read_docx('word_templates/letter.docx') 
+doc_template_with_style <- doc_template |> 
+  docx_set_paragraph_style(
+    style_id = 'rightalignedimg',
+    style_name = 'Right aligned Image',
+    fp_p = fp_par(
+      text.align = 'right', 
+      padding.bottom = 100 ## Add padding bottom
+    )
+  )
+```
+
+CODE
+
+And once we have done that, we can reexecute the same code as before.
+Et voilà, we have a nicer date position.
+
+IMG
+
+
+```{r}
+doc_template_with_style |> 
+  cursor_reach('COMPANY_LOGO') |> 
+  body_remove() |> 
+  body_add_img(
+    src = 'company_logo.png',
+    width = 0.75 * 1201 / 376,
+    height = 0.75,
+    style = 'Right aligned Image',
+    pos = 'before'
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[DATE\\]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  print(target = '04_img_and_date_replacement.docx')
+```
+
+
+---
+
+# Replace remaining placeholders
+
+Next, let us replace all of the remaining placeholders as well.
+We use `body_add_img()` just like before.
+And just like it was the case with the date replacement, the style in which we formatted the placeholders always remains the same (even if they're hideous.)
+
+```{r}
+#| echo: false
+doc_template <- read_docx('word_templates/letter.docx') 
+doc_template_with_style <- doc_template |> 
+  docx_set_paragraph_style(
+    style_id = 'rightalignedimg',
+    style_name = 'Right aligned Image',
+    fp_p = fp_par(
+      text.align = 'right', 
+      padding.bottom = 100 ## Add padding bottom
+    )
+  )
+```
+
+```{r}
+# Re-compute `doc_template_with_style`
+# Otherwise company logo already replaced
+fully_replaced_doc <- doc_template_with_style |> 
+  cursor_reach('COMPANY_LOGO') |> 
+  body_remove() |> 
+  body_add_img(
+    src = 'company_logo.png',
+    width = 0.75 * 1201 / 376,
+    height = 0.75,
+    style = 'Right aligned Image',
+    pos = 'before'
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[DATE\\]',
+    new_value = lubridate::now() |> format('%d.%m.%Y')
+  ) |> 
+  ## REMAINING REPLACEMENTS
+  body_replace_all_text(
+    old_value = 'RECIPIENT',
+    new_value = 'Reader'
+  ) |>
+  body_replace_all_text(
+    old_value = '\\[PURPOSE\\]',
+    new_value = 'demonstrate that you can fill Word docs using R'
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[ADJECTIVE\\]',
+    new_value = 'STUPID'
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[SENDER_NAME\\]',
+    new_value = 'Albert'
+  ) |> 
+  body_replace_all_text(
+    old_value = '\\[SENDER_URL\\]',
+    new_value = 'https://3mw.albert-rapp.de/'
+  ) 
+
+fully_replaced_doc |> 
+  print(target = '05_all_placeholders_replaced.docx')
+```
+
+CODE
+
+IMG
+
+---
+
+# Insert ggplot
+
+And to round it all off, let me show you how to insert a ggplot before the greetings.
+All you have to do is move the fictitious cursor again. 
+This time, we move the cursor to to the greetings and then insert the plot with `body_add_gg()`.
+
+```{r}
+fully_replaced_doc |> 
+  cursor_reach('Warm Regards') |>
+  body_add_gg(
+    pos = 'before',
+    height = 3,
+    width = 3 * 16 / 9,
+    value = {
+      palmerpenguins::penguins |> 
+        ggplot(aes(flipper_length_mm, bill_length_mm)) +
+        geom_point(
+          aes(fill = species), 
+          size = 3, 
+          shape = 21, 
+          col = 'black',
+          alpha = 0.9
+        )
+    }
+  ) |> 
+  print(target = '06_with_ggplot.docx')
+```
+
+CODE
+
+IMG
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
